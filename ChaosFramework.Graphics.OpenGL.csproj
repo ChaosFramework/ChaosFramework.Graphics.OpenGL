@@ -6,9 +6,9 @@
     />
 
   <PropertyGroup>
-    <ProjectGuid>{3C8E5ADC-0E53-40FA-B6F3-3B9DE5996D79}</ProjectGuid>
-    <RootNamespace>ChaosFramework.Graphics.OpenGl</RootNamespace>
     <AssemblyName>ChaosFramework.Graphics.OpenGL</AssemblyName>
+    <RootNamespace>ChaosFramework.Graphics.OpenGl</RootNamespace>
+    <ProjectGuid>{3C8E5ADC-0E53-40FA-B6F3-3B9DE5996D79}</ProjectGuid>
   </PropertyGroup>
 
   <!-- Properties -->
@@ -23,14 +23,44 @@
   <ItemGroup>
     <Compile Include="source\**\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
   </ItemGroup>
 
   <!-- References -->
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Debug.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.Windows.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Primitives.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Reflection.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Serialization.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Collections.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Components.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Core.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Graphics.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.IO.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Math.targets" />
+  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Shapes.targets" />
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+
+    <!-- OpenTK -->
+    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)/packages/OpenTK.3.0.1/lib/net20/OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>$(SolutionDir)/packages/OpenTK.GLControl.3.0.1/lib/net20/OpenTK.GLControl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
 
   <!-- Analyzers -->
   <Import Project="submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.CleanCode.targets" />
+  <Import Project="submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.ClassIntegrity.targets" />
 
   <!-- Cleanup Task -->
   <Import Project="submodules/ChaosPresets.References/BuildTasks/ChaosBuild.CodeFormatter.Tasks.ChangedProjectFiles.targets" />
