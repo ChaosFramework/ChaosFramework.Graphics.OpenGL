@@ -28,6 +28,25 @@
     <None Include="packages.config" />
   </ItemGroup>
 
+  <!-- Resources-->
+  <ItemGroup>
+    <None Include="Resources\**\*.fx" />
+    <None Include="Resources\**\*.cfx" />
+    <None Include="Resources\**\*.gmdl" />
+    <None Include="Resources\**\*.png" />
+
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
   <!-- References -->
   <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Debug.targets" />
   <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.targets" />
