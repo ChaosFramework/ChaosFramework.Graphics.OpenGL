@@ -1,0 +1,3 @@
+[submodule "submodules/ChaosPresets.References"]
+	path = submodules/ChaosPresets.References
+	url = ../../ChaosFramework/ChaosPresets.References.git
