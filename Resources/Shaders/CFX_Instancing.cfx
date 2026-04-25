@@ -1,0 +1,36 @@
+import viewProj from ChaosGraphics.VertexShaders;
+
+void vs_transformPosition(
+	vec3 inPosition : POSITION,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	out vec4 outPosition : gl_Position
+) {
+	outPosition = ((vec4(inPosition, 1.0) * instanceTransform) * viewProj);
+}
+
+void vs_transformPositionAndWorld(
+	vec3 inPosition : POSITION,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	out vec4 outPosition : gl_Position,
+	out vec3 outWorldPosition : TEXCOORD1
+) {
+	vec4 worldPos = (vec4(inPosition, 1.0) * instanceTransform);
+	outWorldPosition = worldPos.xyz;
+	outPosition = (worldPos * viewProj);
+}
+
+void vs_transformNormal(
+	vec3 inNormal : NORMAL,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	out vec3 outNormal : TEXCOORD2
+) {
+	outNormal = normalize((vec4(inNormal, 0.0) * instanceTransform).xyz);
+}
+
+void vs_transformTangent(
+	vec4 inTangent : TANGENT,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	out vec4 outTangent : TEXCOORD3
+) {
+	outTangent = vec4(normalize((vec4(inTangent.xyz, 0.0) * instanceTransform).xyz), inTangent.w);
+}

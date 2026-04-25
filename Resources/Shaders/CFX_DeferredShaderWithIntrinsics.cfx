@@ -1,0 +1,50 @@
+import vs_fullscreen from ChaosGraphics.VertexShaders;
+import shadeDefault, sampleLightData from ChaosGraphics.Shade;
+import *Variables from ChaosGraphics.Shade;
+
+#define INTRINSICS
+
+vec4 screenSize : SCREEN_SIZE;
+float alphaThreshold = 0.5;
+
+void fs_sampleBuffers(
+	in vec2 inTex : TEXCOORD0,
+	out vec3 worldPos : WORLDPOS,
+	out vec3 normal : NORMAL,
+	out vec4 diffuse : DIFFUSE,
+	out vec4 specular : SPECULAR
+) {
+	worldPos = texture(positionSampler, inTex).xyz;
+	sampleLightData(inTex, normal, diffuse, specular);
+}
+
+void fs_renderClip(
+	out vec4 result : COLOR0
+) {
+	vec2 inTex = (gl_FragCoord.xy - screenSize.xy) / screenSize.zw;
+	result = texture(emissiveSampler, inTex);
+	if (result.a < alphaThreshold)
+		discard;
+	result.a = 1.0;
+}
+
+void fs_render(
+	out vec4 result : COLOR0
+) {
+	vec2 inTex = (gl_FragCoord.xy - screenSize.xy) / screenSize.zw;
+	result = texture(emissiveSampler, inTex);
+}
+
+Pass render
+{
+	Enable(DepthTest, false);
+	FragmentShader = fs_render, fs_sampleBuffers INTRINSICS;
+	VertexShader = vs_fullscreen;
+}
+
+Pass renderTested
+{
+	Enable(DepthTest, false);
+	FragmentShader = fs_renderClip, fs_sampleBuffers INTRINSICS;
+	VertexShader = vs_fullscreen;
+}

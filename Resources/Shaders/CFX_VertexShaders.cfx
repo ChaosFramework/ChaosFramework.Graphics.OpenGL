@@ -1,0 +1,86 @@
+mat4 transform : WORLD;
+mat4 invTransTransform : WORLDINVTRANS;
+mat4 viewProj : VIEW_PROJECTION;
+
+const vec2 positions[4] = vec2[]
+(
+ 	vec2(-1.0,  1.0),
+ 	vec2( 1.0,  1.0),
+ 	vec2(-1.0, -1.0),
+ 	vec2( 1.0, -1.0)
+);
+
+const vec2 texCoords[4] = vec2[]
+(
+ 	vec2(0.0, 1.0),
+ 	vec2(1.0, 1.0),
+ 	vec2(0.0, 0.0),
+ 	vec2(1.0, 0.0)
+);
+
+void vs_createSprite(
+	out vec4 position : gl_Position,
+	out vec2 texCoord : TEXCOORD0
+) {
+	texCoord = texCoords[gl_VertexID];
+	vs_transformPosition(vec3(positions[gl_VertexID], 0.0), position);
+}
+
+void vs_createSpriteInstanced(
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	out vec4 position : gl_Position,
+	out vec2 texCoord : TEXCOORD0
+) {
+	texCoord = texCoords[gl_VertexID];
+	vs_transformPosition((vec4(positions[gl_VertexID], 0.0, 1.0) * instanceTransform).xyz, position);
+}
+
+void vs_transformPosition(
+	vec3 inPosition : POSITION,
+	out vec4 outPosition : gl_Position
+) {
+	outPosition = ((vec4(inPosition, 1) * transform) * viewProj);
+}
+
+void vs_transformPositionAndWorld(
+	vec3 inPosition : POSITION,
+	out vec4 outPosition : gl_Position,
+	out vec3 outWorldPosition : TEXCOORD1
+) {
+	vec4 worldPos = (vec4(inPosition, 1) * transform);
+	outWorldPosition = worldPos.xyz;
+	outPosition = (worldPos * viewProj);
+}
+
+void vs_transformNormal(
+	vec3 inNormal : NORMAL,
+	out vec3 outNormal : TEXCOORD2
+) {
+	outNormal = normalize((vec4(inNormal, 0) * invTransTransform).xyz);
+}
+
+void vs_transformTangent(
+	vec4 inTangent : TANGENT,
+	out vec4 outTangent : TEXCOORD3
+) {
+	outTangent = vec4(normalize((vec4(inTangent.xyz, 0) * transform).xyz), inTangent.w);
+}
+
+void vs_screenPosition(
+	vec3 inPosition : POSITION,
+	out vec4 outPosition : gl_Position,
+	out vec2 outTexCoord : TEXCOORD0
+) {
+	outPosition = vec4(inPosition.xy, 1.0, 1.0);
+	outTexCoord = vec2(inPosition.x + 1.0, 1.0 - inPosition.y) / 2.0;
+}
+
+void vs_fullscreen(
+	out vec4 outPosition : gl_Position,
+	out vec2 fsTexCoord : TEXCOORD0
+) {
+	float y = float(gl_VertexID % 2);
+	float x = float(gl_VertexID / 2);
+	outPosition = vec4(-1.0 + x*4.0, -1.0+y*4.0, 0.0, 1.0);
+	fsTexCoord = vec2(x * 2.0, y * 2.0);
+}

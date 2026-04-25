@@ -1,0 +1,15 @@
+sampler2D screenTransparent;
+sampler2D screenSolid;
+
+vec4 screenSize : SCREEN_SIZE;
+
+vec4 sampleScreenAt(vec2 where) {
+	vec4 transparent = texture(screenTransparent, where);
+	vec4 solid = texture(screenSolid, where);
+	return transparent + solid * (1 - clamp(transparent.a, 0, 1));
+}
+
+vec4 sampleScreenAtOffset(vec2 offset) {
+	vec2 screenTex = (gl_FragCoord.xy - screenSize.xy) / screenSize.zw;
+	return sampleScreenAt(screenTex + offset);
+}

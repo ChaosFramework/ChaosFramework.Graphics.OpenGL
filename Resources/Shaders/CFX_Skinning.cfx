@@ -1,0 +1,59 @@
+import transform, viewProj, invTransTransform from ChaosGraphics.VertexShaders;
+import ChaosGraphics.NormalMapPasses;
+
+#define WORLD_VERTEX_SHADER vs_transformPosNorTanTex
+#define MATERIAL_VERTEX_SHADER vs_transformPosTex
+
+const mat4 identity = mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+mat4 boneTransforms[32];
+
+mat4 interpolateBoneTransform(
+	vec4 boneIndices,
+	vec4 boneWeights
+) {
+	mat4 boneTransform =
+		boneTransforms[int(boneIndices[0])] * boneWeights[0] +
+		boneTransforms[int(boneIndices[1])] * boneWeights[1] +
+		boneTransforms[int(boneIndices[2])] * boneWeights[2] +
+		boneTransforms[int(boneIndices[3])] * boneWeights[3];
+
+	float weightSum = boneWeights[0] +  boneWeights[1] +  boneWeights[2] +  boneWeights[3];
+	return weightSum == 0 ? identity : boneTransform / max(0.001, weightSum);
+}
+
+void vs_transformPosNorTanTex(
+	vec3 inPosition : POSITION,
+	vec2 inTex : TEXCOORD0,
+	vec3 inNormal : NORMAL,
+	vec4 inTangent : TANGENT,
+	vec4 boneIndices : BONE_INDICES,
+	vec4 boneWeights : BONE_WEIGHTS,
+	out vec4 outPosition : gl_Position,
+	out vec2 outTexCoord : TEXCOORD0,
+	out vec3 outWorldPosition : TEXCOORD1,
+	out vec3 outNormal : TEXCOORD2,
+	out vec4 outTangent : TEXCOORD3
+) {
+	mat4 boneTransform = interpolateBoneTransform(boneIndices, boneWeights);
+	outWorldPosition = (vec4(inPosition, 1) * (boneTransform * transform)).xyz;
+	outPosition = (vec4(outWorldPosition, 1) * viewProj);
+	outTexCoord = inTex;
+	mat4 normalTransform = boneTransform * invTransTransform;
+	outNormal = normalize((vec4(inNormal, 0) * normalTransform).xyz);
+	outTangent = vec4(normalize((vec4(inTangent.xyz, 0) * transform).xyz), inTangent.w);
+}
+
+void vs_transformPosTex(
+	vec3 inPosition : POSITION,
+	vec2 inTex : TEXCOORD0,
+	vec4 boneIndices : BONE_INDICES,
+	vec4 boneWeights : BONE_WEIGHTS,
+	out vec4 outPosition : gl_Position,
+	out vec2 outTexCoord : TEXCOORD0
+) {
+	mat4 boneTransform = interpolateBoneTransform(boneIndices, boneWeights);
+	vec3 outWorldPosition = (vec4(inPosition, 1) * (boneTransform * transform)).xyz;
+	outPosition = (vec4(outWorldPosition, 1) * viewProj);
+	outTexCoord = inTex;
+}

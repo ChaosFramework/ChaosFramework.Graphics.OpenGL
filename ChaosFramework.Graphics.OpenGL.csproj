@@ -1,89 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import
-    Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-    Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"
-    />
+<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Project Metadata -->
   <PropertyGroup>
     <AssemblyName>ChaosFramework.Graphics.OpenGL</AssemblyName>
     <RootNamespace>ChaosFramework.Graphics.OpenGl</RootNamespace>
     <ProjectGuid>{3C8E5ADC-0E53-40FA-B6F3-3B9DE5996D79}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>IGNORE_SHADER_WARNINGS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>$(DefineConstants);ThrowErrors</DefineConstants>
   </PropertyGroup>
 
   <!-- Properties -->
-  <Import Project="submodules/ChaosPresets.Targets/Properties/Library.targets" />
-  <Import Project="submodules/ChaosPresets.Targets/Paths/Output/bin.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Properties/Common.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Properties/OutputType/Library.targets" />
 
-  <!-- Configuration and Platform -->
-  <Import Project="submodules/ChaosPresets.Targets/Configurations.targets" />
-  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' " />
+  <!-- Configurations -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Configurations.targets" />
 
   <!-- Included Files -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/StandardResources.targets" />
   <ItemGroup>
-    <Compile Include="source\**\*.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-
+    <Compile Include="source/**/*.cs" />
+    <None Include="License/**/*.txt" />
     <None Include="OpenTK.dll.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-
-  <!-- Resources-->
-  <ItemGroup>
-    <None Include="Resources\**\*.fx" />
-    <None Include="Resources\**\*.cfx" />
-    <None Include="Resources\**\*.gmdl" />
-    <None Include="Resources\**\*.png" />
-
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <None Include="Resources/**/*.gmdl" />
+    <None Include="Resources/**/*.png" />
+    <None Include="Resources/Shaders/**/*.cfx" />
+    <None Include="Resources/Shaders/**/*.fx" />
   </ItemGroup>
 
   <!-- References -->
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Debug.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.Windows.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Primitives.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Reflection.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Serialization.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Collections.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Components.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Core.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Graphics.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.IO.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Math.targets" />
-  <Import Project="submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Shapes.targets" />
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.Windows.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosAnalyzers.ClassIntegrity.Types.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Components.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Graphics.targets" />
 
-    <!-- OpenTK -->
-    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)/packages/OpenTK.3.0.1/lib/net20/OpenTK.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="OpenTK.GLControl, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)/packages/OpenTK.GLControl.3.0.1/lib/net20/OpenTK.GLControl.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="3.0.1" />
+    <PackageReference Include="OpenTK.GLControl" Version="3.0.1" />
+    <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
   </ItemGroup>
 
   <!-- Analyzers -->
-  <Import Project="submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.CleanCode.targets" />
-  <Import Project="submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.ClassIntegrity.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.CleanCode.targets" />
 
-  <!-- Cleanup Task -->
-  <Import Project="submodules/ChaosPresets.References/BuildTasks/ChaosBuild.CodeFormatter.Tasks.ChangedProjectFiles.targets" />
+  <!-- Build Tasks -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/BuildTasks/ChaosBuild.CodeFormatter.Tasks.ChangedProjectFiles.targets" />
 
-  <!-- Default Targets for Building CSharp Projects -->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
