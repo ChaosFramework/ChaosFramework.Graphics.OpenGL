@@ -36,7 +36,7 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             return (camera.Position - l.position).LengthSq() > (dRange * dRange);
         }
 
-        protected override void Add(DeferredShader target, PointLight l)
+        protected override bool Add(DeferredShader target, PointLight l)
         {
             (Frontfacing(l, target.view) ? informer : backFacingInformer)
                 .AddInstance(
@@ -49,6 +49,8 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
                         0,
                         0)
                     );
+
+            return true;
         }
 
         public override void Render(DeferredShader target)

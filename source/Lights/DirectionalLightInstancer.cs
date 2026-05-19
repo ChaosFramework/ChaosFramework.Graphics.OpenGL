@@ -110,7 +110,7 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             numInstances = 0;
         }
 
-        protected override void Add(DeferredShader target, DirectionalLight l)
+        protected override bool Add(DeferredShader target, DirectionalLight l)
         {
             if (numInstances == maxInstances - 1)
                 Enlarge();
@@ -119,6 +119,8 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             Marshal.StructureToPtr(l.direction, IntPtr.Add(unmanagedData, offset), false);
             Marshal.StructureToPtr(l.premultipliedColor.ToVec(), IntPtr.Add(unmanagedData, offset + SZ_VEC3), false);
             Marshal.StructureToPtr(l.premultipliedAmbientVec, IntPtr.Add(unmanagedData, offset + SZ_VEC3 + SZ_VEC4), false);
+
+            return true;
         }
 
         public override void Render(DeferredShader target)

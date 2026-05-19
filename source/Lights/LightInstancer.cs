@@ -7,7 +7,7 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
     {
         Type LightType();
         void Reset();
-        void Add(DeferredShader shader, Light l);
+        bool Add(DeferredShader shader, Light l);
         void Render(DeferredShader shader);
     }
 
@@ -18,13 +18,13 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
     {
         Type LightInstancerBase.LightType() => typeof(Light);
 
-        void LightInstancerBase.Add(DeferredShader shader, Lights.Light l)
+        bool LightInstancerBase.Add(DeferredShader shader, Lights.Light l)
             => Add(shader, (Light)l);
 
         public abstract void Render(DeferredShader shader);
 
         public abstract void Reset();
 
-        protected abstract void Add(DeferredShader shader, Light l);
+        protected abstract bool Add(DeferredShader shader, Light l);
     }
 }

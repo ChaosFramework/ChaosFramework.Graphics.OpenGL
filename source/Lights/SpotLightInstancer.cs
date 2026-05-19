@@ -1,3 +1,4 @@
+using ChaosFramework.Core;
 using ChaosFramework.Graphics.OpenGl.Instancing;
 using ChaosFramework.Graphics.OpenGl.AssetContainers;
 using ChaosFramework.Math;
@@ -5,24 +6,30 @@ using ChaosFramework.Math.Vectors;
 
 namespace ChaosFramework.Graphics.OpenGl.Lights
 {
-    public class SpotLightInstancer : LightInstancer<SpotLight>
+    public abstract class SpotLightInstancer<SpecializedSpotLight> : LightInstancer<SpecializedSpotLight>
+        where SpecializedSpotLight : SpotLight
     {
-        static readonly string[] registers = new[] { "POSITION_RANGE", "LIGHT_COLOR", "DIRECTION_FALLOFF", "ANGLE" };
+        protected static readonly string[] SPOTLIGHT_REGISTERS = new[] { "POSITION_RANGE", "LIGHT_COLOR", "DIRECTION_ANGLE" };
 
-        readonly Graphics graphics;
+        protected readonly Graphics graphics;
         readonly MatrixInstancer informer, backFacingInformer;
         readonly MeshContainer.Entry mesh;
-        readonly ShaderContainer.Entry shader;
+        protected readonly ShaderContainer.Entry shader;
 
-        public SpotLightInstancer(Graphics graphics, int expectedInstances)
+        public SpotLightInstancer(Graphics graphics, int expectedInstances, string[] registers)
         {
             this.graphics = graphics;
 
             informer = new MatrixInstancer(graphics, registers, expectedInstances, false);
             backFacingInformer = new MatrixInstancer(graphics, registers, expectedInstances, false);
-            shader = graphics.shaders.Load($"ChaosGraphics.{nameof(SpotLight)}", informer);
-            mesh = graphics.meshes.Load($"${nameof(SpotLight)}", informer);
+            shader = GetShader(informer);
+            mesh = GetMesh(informer);
         }
+
+        protected abstract MeshContainer.Entry GetMesh(Disposable monitor);
+
+        protected virtual ShaderContainer.Entry GetShader(Disposable monitor)
+            => graphics.shaders.Load($"ChaosGraphics.{typeof(SpecializedSpotLight).Name}", informer);
 
         public override void Reset()
         {
@@ -30,23 +37,25 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             backFacingInformer.Reset();
         }
 
-        public bool Frontfacing(SpotLight l, Camera camera)
+        public bool Frontfacing(SpecializedSpotLight l, Camera camera)
             => Shapes.Intersection.ConvexHull.CheckIntersection(
                 new Shapes.Convex.SphereShape(camera.Position, camera.nearClip),
                 l.shape
                 ) == null;
 
-        protected override void Add(DeferredShader target, SpotLight l)
+        protected override bool Add(DeferredShader target, SpecializedSpotLight l)
         {
-            (Frontfacing(l, target.view) ? informer : backFacingInformer)
-                .AddInstance(
-                    l.transform,
-                    new Vector4f(l.position, l.range),
-                    l.premultipliedColor.ToVec(),
-                    new Vector4f(l.direction, l.falloff),
-                    l.angle
-                    );
+            (Frontfacing(l, target.view) ? informer : backFacingInformer).AddInstance(l.transform, GetInstanceData(l));
+
+            return true;
         }
+
+        protected virtual Vector4f[] GetInstanceData(SpecializedSpotLight l)
+            => new [] {
+                new Vector4f(l.position, l.range),
+                l.premultipliedColor.ToVec(),
+                new Vector4f(l.direction, l.angle)
+                };
 
         public override void Render(DeferredShader target)
         {

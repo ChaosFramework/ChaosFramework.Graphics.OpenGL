@@ -42,7 +42,7 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             informer.Reset();
         }
 
-        protected override void Add(DeferredShader target, SegmentLight l)
+        protected override bool Add(DeferredShader target, SegmentLight l)
         {
             informer.AddInstance(
                 new Vector4f(l.position, l.range),
@@ -50,6 +50,8 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
                 new Vector4f(l.position2, l.range2),
                 l.color2.ToVec()
                 );
+
+            return true;
         }
 
         protected override void DoDispose()

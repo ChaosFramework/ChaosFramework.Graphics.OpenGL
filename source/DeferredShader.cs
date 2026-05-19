@@ -1,8 +1,10 @@
+using ChaosFramework.Collections;
 using ChaosFramework.Core;
 using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Linq;
 using SysCol = System.Collections.Generic;
 
 namespace ChaosFramework.Graphics.OpenGl
@@ -32,7 +34,7 @@ namespace ChaosFramework.Graphics.OpenGl
         public readonly Graphics graphics;
         public readonly Camera view;
 
-        readonly SysCol.Dictionary<Type, LightInstancerBase> lightInstancers;
+        readonly SysCol.Dictionary<Type, LightInstancerBase[]> lightInstancers;
 
         readonly DeferredShader parent;
         readonly DeferredShaderIntrinsicLights[] intrinsics;
@@ -67,7 +69,7 @@ namespace ChaosFramework.Graphics.OpenGl
             this.intrinsics = intrinsics;
 
             layers = new Texture[NUM_LAYERS];
-            lightInstancers = new SysCol.Dictionary<Type, LightInstancerBase>();
+            lightInstancers = new SysCol.Dictionary<Type, LightInstancerBase[]>();
         }
 
         public DeferredShader(
@@ -132,8 +134,12 @@ namespace ChaosFramework.Graphics.OpenGl
 
         void CreateInstancers(LightInstancerBase[] instancers)
         {
+            SysCol.Dictionary<Type, LinkedList<LightInstancerBase>> tmp = new SysCol.Dictionary<Type, LinkedList<LightInstancerBase>>();
             foreach (LightInstancerBase instancer in instancers)
-                lightInstancers[instancer.LightType()] = instancer;
+                tmp.GetOrCreateValue(instancer.LightType()).Add(instancer);
+
+            foreach (SysCol.KeyValuePair<Type, LinkedList<LightInstancerBase>> kvp in tmp)
+                lightInstancers[kvp.Key] = kvp.Value.ToArray();
         }
 
         void BuildResources()
@@ -359,13 +365,14 @@ namespace ChaosFramework.Graphics.OpenGl
                 foreach (DeferredShaderIntrinsicLights intrinsic in intrinsics)
                     intrinsic.Clear();
 
-                foreach (LightInstancerBase instancer in lightInstancers.Values)
-                    instancer.Reset();
+                foreach (LightInstancerBase[] instancers in lightInstancers.Values)
+                    foreach (LightInstancerBase instancer in instancers)
+                        instancer.Reset();
 
                 foreach (Type t in lights.EnumerateTypes())
                 {
-                    LightInstancerBase instancer;
-                    bool hasInstancer = lightInstancers.TryGetValue(t, out instancer);
+                    LightInstancerBase[] instancers;
+                    bool hasInstancer = lightInstancers.TryGetValue(t, out instancers);
                     foreach (Light light in lights.EnumerateLights(t))
                     {
                         foreach (DeferredShaderIntrinsicLights i in intrinsics)
@@ -373,7 +380,9 @@ namespace ChaosFramework.Graphics.OpenGl
                                 goto next;
 
                         if (hasInstancer)
-                            instancer.Add(this, light);
+                            foreach (LightInstancerBase instancer in instancers)
+                                if (instancer.Add(this, light))
+                                    goto next;
                         next:;
                     }
                 }
@@ -399,8 +408,9 @@ namespace ChaosFramework.Graphics.OpenGl
                         BlendingFactorDest.One
                         ));
 
-                foreach (LightInstancerBase instancer in lightInstancers.Values)
-                    instancer.Render(this);
+                foreach (LightInstancerBase[] instancers in lightInstancers.Values)
+                    foreach (LightInstancerBase instancer in instancers)
+                        instancer.Render(this);
             }
         }
 
@@ -415,8 +425,10 @@ namespace ChaosFramework.Graphics.OpenGl
             }
 
             DisposeSurfaces();
-            foreach (Disposable instancer in lightInstancers.Values)
-                instancer.Dispose();
+
+            foreach (LightInstancerBase[] instancers in lightInstancers.Values)
+                foreach (Disposable instancer in instancers)
+                    instancer.Dispose();
         }
 
         void DisposeSurfaces()

@@ -31,7 +31,8 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
         }
 
         static bool IsMissingShader(Type lightType)
-            => lightType.IsSubclassOf(typeof(Light))
+            => !lightType.IsAbstract
+            && lightType.IsSubclassOf(typeof(Light))
             && !AccessScope<SysCol.HashSet<string>>.current.Contains($"FX_{lightType.Name}");
 
         static Exception CreateMissingShaderException(Type lightType)

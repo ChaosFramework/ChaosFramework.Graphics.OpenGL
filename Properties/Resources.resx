@@ -86,6 +86,9 @@
   <data name="CFX_Skinning" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shaders\CFX_Skinning.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="CFX_SpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\CFX_SpotLight.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="CFX_TransparentScreenSampling" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shaders\CFX_TransparentScreenSampling.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -131,8 +134,11 @@
   <data name="FX_SegmentLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shaders\Lights\FX_SegmentLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="FX_SpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Shaders\Lights\FX_SpotLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="FX_CircularSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_CircularSpotLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_MaskedSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_MaskedSpotLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="FX_Sprite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shaders\FX_Sprite.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -152,8 +158,8 @@
   <data name="Mesh_PointLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lights\Mesh_PointLight.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Mesh_SpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Lights\Mesh_SpotLight.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Mesh_CircularSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Lights\Mesh_CircularSpotLight.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Tex_Black" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\DefaultColors\Tex_Black.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

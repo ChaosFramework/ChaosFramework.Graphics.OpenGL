@@ -1,4 +1,3 @@
-using ChaosFramework.Graphics.OpenGl.AssetContainers;
 using ChaosFramework.Graphics.Colors;
 using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
@@ -7,11 +6,10 @@ using static ChaosFramework.Math.Constants;
 
 namespace ChaosFramework.Graphics.OpenGl.Lights
 {
-    public class SpotLight : Light
+    public abstract class SpotLight : Light
     {
         public Vector3f up = new Vector3f(0, 1, 0);
         public Vector3f position = new Vector3f(0, -1, 4);
-        public TextureContainer.Entry mask;
 
         public Matrix transform { get; private set; }
 
@@ -24,7 +22,6 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
 
         public float range = 40;
         public float angle = PI_HALF / 2;
-        public float falloff = 0;
 
         internal Shape shape;
 
@@ -32,17 +29,15 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             Vector3f position,
             Rgba color,
             float range,
-            float angle,
-            float falloff
+            float angle
             )
         {
             this.position = position;
             base.color = color;
             this.range = range;
             this.angle = angle;
-            this.falloff = falloff;
 
-            shape = new SphereShape(Vector3f.EMPTY, 1.0f); // TODO: make this a proper cone shape
+            shape = new SphereShape(Vector3f.EMPTY, 1.0f); // TODO: make this a proper cone shape / make implementation specific
         }
 
         public override void Update()
