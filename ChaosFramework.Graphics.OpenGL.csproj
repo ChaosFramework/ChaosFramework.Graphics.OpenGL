@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Project Metadata -->
+  <PropertyGroup>
+    <AssemblyName>ChaosFramework.Graphics.OpenGL</AssemblyName>
+    <RootNamespace>ChaosFramework.Graphics.OpenGl</RootNamespace>
+    <ProjectGuid>{3C8E5ADC-0E53-40FA-B6F3-3B9DE5996D79}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>IGNORE_SHADER_WARNINGS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>$(DefineConstants);ThrowErrors</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Properties -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Properties/Common.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Properties/OutputType/Library.targets" />
+
+  <!-- Configurations -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/Configurations.targets" />
+
+  <!-- Included Files -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.Targets/StandardResources.targets" />
+  <ItemGroup>
+    <Compile Include="source/**/*.cs" />
+    <None Include="License/**/*.txt" />
+    <None Include="OpenTK.dll.config" />
+    <None Include="Resources/**/*.gmdl" />
+    <None Include="Resources/**/*.png" />
+    <None Include="Resources/Shaders/**/*.cfx" />
+    <None Include="Resources/Shaders/**/*.fx" />
+  </ItemGroup>
+
+  <!-- References -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.Windows.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosAnalyzers.ClassIntegrity.Types.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Components.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Graphics.targets" />
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="3.0.1" />
+    <PackageReference Include="OpenTK.GLControl" Version="3.0.1" />
+    <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- Analyzers -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/Analyzers/ChaosAnalyzers.CleanCode.targets" />
+
+  <!-- Build Tasks -->
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/BuildTasks/ChaosBuild.CodeFormatter.Tasks.ChangedProjectFiles.targets" />
+
+</Project>

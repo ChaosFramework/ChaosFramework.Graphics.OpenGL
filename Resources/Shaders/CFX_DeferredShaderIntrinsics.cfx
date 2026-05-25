@@ -1,0 +1,13 @@
+#define MAX_LIGHTS
+#define SHADE_METHOD
+#define SHADE_ARGS
+
+void fs_add(
+	vec3 worldPos : WORLDPOS,
+	vec3 normal : NORMAL,
+	vec4 diffuse : DIFFUSE,
+	vec4 specular : SPECULAR
+) {
+	for (int i = 0; i < MAX_LIGHTS; i++)
+		COLOR0 += SHADE_METHOD(SHADE_ARGS);
+}

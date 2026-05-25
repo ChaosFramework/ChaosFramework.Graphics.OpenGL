@@ -1,0 +1,67 @@
+import viewProj from ChaosGraphics.VertexShaders;
+import ChaosGraphics.NormalMapPasses;
+
+#define WORLD_VERTEX_SHADER vs_transform, PASS(vec2 TEXCOORD0)
+#define MATERIAL_VERTEX_SHADER vs_transformPosition, PASS(vec2 TEXCOORD0)
+
+const mat4 identity = mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+sampler2D boneTransforms;
+
+mat4 sampleBoneTransform(int instanceID, int boneID) {
+	mat4 result;
+	result[0] = texelFetch(boneTransforms, ivec2(boneID * 4 + 0, instanceID), 0);
+	result[1] = texelFetch(boneTransforms, ivec2(boneID * 4 + 1, instanceID), 0);
+	result[2] = texelFetch(boneTransforms, ivec2(boneID * 4 + 2, instanceID), 0);
+	result[3] = texelFetch(boneTransforms, ivec2(boneID * 4 + 3, instanceID), 0);
+	return result;
+}
+
+mat4 interpolateBoneTransform(
+	int instanceID,
+	vec4 boneIndices,
+	vec4 boneWeights
+) {
+	mat4 boneTransform =
+	 	sampleBoneTransform(instanceID, int(boneIndices[0])) * boneWeights[0] +
+		sampleBoneTransform(instanceID, int(boneIndices[1])) * boneWeights[1] +
+		sampleBoneTransform(instanceID, int(boneIndices[2])) * boneWeights[2] +
+		sampleBoneTransform(instanceID, int(boneIndices[3])) * boneWeights[3];
+
+	float weightSum = boneWeights[0] +  boneWeights[1] +  boneWeights[2] +  boneWeights[3];
+	return weightSum == 0 ? identity : boneTransform / max(0.001, weightSum);
+}
+
+void vs_transform(
+	vec3 inPosition : POSITION,
+	vec3 inNormal : NORMAL,
+	vec4 inTangent : TANGENT,
+	vec4 boneIndices : BONE_INDICES,
+	vec4 boneWeights : BONE_WEIGHTS,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	int instanceID : gl_InstanceID,
+	out vec4 outPosition : gl_Position,
+	out vec3 outWorldPosition : TEXCOORD1,
+	out vec3 outNormal : TEXCOORD2,
+	out vec4 outTangent : TEXCOORD3
+) {
+	mat4 boneTransform = interpolateBoneTransform(instanceID, boneIndices, boneWeights);
+	mat4 combinedTransform= boneTransform * instanceTransform;
+	outWorldPosition = (vec4(inPosition, 1) * (combinedTransform)).xyz;
+	outPosition = (vec4(outWorldPosition, 1) * viewProj);
+	outNormal = normalize((vec4(inNormal, 0) * combinedTransform).xyz);
+	outTangent = vec4(normalize((vec4(inTangent.xyz, 0) * combinedTransform).xyz), inTangent.w);
+}
+
+void vs_transformPosition(
+	vec3 inPosition : POSITION,
+	vec4 boneIndices : BONE_INDICES,
+	vec4 boneWeights : BONE_WEIGHTS,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	int instanceID : gl_InstanceID,
+	out vec4 outPosition : gl_Position
+) {
+	mat4 boneTransform = interpolateBoneTransform(instanceID, boneIndices, boneWeights);
+	vec3 outWorldPosition = (vec4(inPosition, 1) * (boneTransform * instanceTransform)).xyz;
+	outPosition = (vec4(outWorldPosition, 1) * viewProj);
+}

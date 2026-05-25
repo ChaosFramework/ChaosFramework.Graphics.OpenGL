@@ -1,0 +1,273 @@
+using ChaosFramework.Core;
+using ChaosFramework.Graphics.OpenGl.AssetContainers;
+using ChaosFramework.Math;
+using ChaosFramework.Math.Vectors;
+using ChaosFramework.Shapes;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+using System;
+using System.Threading;
+using static ChaosFramework.Math.Clamping;
+using SysCol = System.Collections.Generic;
+using Forms = System.Windows.Forms;
+
+namespace ChaosFramework.Graphics.OpenGl
+{
+    public class Graphics : Disposable
+    {
+        static Thread graphicsThread;
+
+        static void DisposeMaterial(Material mat) => mat.Dispose();
+
+        [System.Diagnostics.Conditional("ThrowErrors")]
+        public static void ThrowErrors()
+        {
+            if (System.Threading.Thread.CurrentThread != graphicsThread)
+                throw new InvalidOperationException("ThrowErrors must be called from the GL thread!");
+            ErrorCode error = GL.GetError();
+
+            if (error != ErrorCode.NoError)
+                throw new InvalidOperationException(error.ToString());
+        }
+
+        public readonly Dispatcher dispatcher;
+        public readonly Shaders shaders;
+        public readonly Forms.Control deviceControl;
+        public readonly GraphicsContext graphicsContext;
+
+        public readonly GraphicsMode graphicsMode = GraphicsMode.Default;
+        public readonly int versionMajor, versionMinor;
+        public readonly OpenTK.Platform.IWindowInfo defaultWindow;
+        public readonly int glVersionMajor, glVersionMinor;
+        public readonly int coreProfile;
+
+        public event Action windowsChanged;
+
+        internal readonly MeshContainer meshes;
+        internal readonly TextureContainer textures;
+
+        internal int sharedInstancingBuffer = -1;
+        int maxInstancingSize = 0;
+
+        readonly SysCol.HashSet<string> supportedExtensions;
+
+        /// <summary>
+        ///     Some GPUs (particularly intel, as it appears) need GL.Flush commands
+        ///     after rendering with a specific shader program,
+        ///     because they appear to mix up shader inputs otherwise.
+        /// </summary>
+        public bool needsFlush { get; private set; }
+
+        public TextureContainer.Entry whitePixel { get; private set; }
+        public MaterialContainer.Entry defaultMaterial { get; private set; }
+
+        public int emptyVAO { get; private set; }
+        public int triangleVAO { get; private set; }
+
+        public GlStateTracker stateTracker { get; private set; }
+
+        public bool fullscreen { get; private set; }
+        public float ratio { get { return (float)width / height; } }
+        public int width => deviceControl.ClientSize.Width;
+        public int height => deviceControl.ClientSize.Height;
+        public Vector2i size => new Vector2i(width, height);
+        public Vector2i viewportOffset => new Vector2i(0, deviceControl.Height - height);
+
+        public Graphics(
+            Forms.Control deviceControl,
+            int versionMajor,
+            int versionMinor,
+            bool fullScreen = false,
+            Action<Graphics> loadingScreen = null
+            ) : this(Dispatcher.dispatcher, deviceControl, versionMajor, versionMinor, fullScreen, loadingScreen)
+        { }
+
+        public Graphics(
+            Dispatcher dispatcher,
+            Forms.Control deviceControl,
+            int versionMajor,
+            int versionMinor,
+            bool fullScreen = false,
+            Action<Graphics> loadingScreen = null
+            )
+        {
+            this.dispatcher = dispatcher;
+            this.deviceControl = deviceControl;
+            this.versionMajor = versionMajor;
+            this.versionMinor = versionMinor;
+
+            coreProfile = 100 * versionMajor + 10 * versionMinor;
+            supportedExtensions = new SysCol.HashSet<string>();
+
+            graphicsThread = System.Threading.Thread.CurrentThread;
+
+            defaultWindow = MakeGl(deviceControl);
+
+            graphicsContext = new GraphicsContext(graphicsMode, defaultWindow, versionMajor, versionMinor, GraphicsContextFlags.Default);
+            graphicsContext.LoadAll();
+            graphicsContext.SwapInterval = 0;
+
+            int numExts = GL.GetInteger(GetPName.NumExtensions);
+            for (int i = 0; i < numExts; i++)
+                supportedExtensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
+            glVersionMajor = GL.GetInteger(GetPName.MajorVersion);
+            glVersionMinor = GL.GetInteger(GetPName.MinorVersion);
+
+            CreateDevice();
+
+            new Shaders(this, ref shaders);
+            loadingScreen?.Invoke(this);
+
+            meshes = new MeshContainer(StreamSources.meshes, dispatcher, false);
+            meshes.AddFactory("$Sprite", _ => new Model.Mesh(dispatcher, MeshData.sprite));
+
+            textures = new TextureContainer(StreamSources.textures, dispatcher, false);
+            whitePixel = textures.Load("$WhitePixel", this);
+
+            defaultMaterial = MaterialContainer.Entry.Mock((_, __) => new Material(this), DisposeMaterial);
+            ThrowErrors();
+        }
+
+        Material CreateDefaultMaterial(MaterialContainer.Key key, CancellationToken ct) => new Material(this);
+
+        public bool SupportsExtension(string extensionName)
+            => supportedExtensions.Contains(extensionName);
+
+        public bool SupportsExtensions(params string[] extensionNames)
+        {
+            foreach (string ext in extensionNames)
+                if (!supportedExtensions.Contains("GL_" + ext))
+                    return false;
+
+            return true;
+        }
+
+        public OpenTK.Platform.IWindowInfo MakeGl(Forms.Control targetControl)
+        {
+            OpenTK.GLControl internalControl = new OpenTK.GLControl(graphicsMode, versionMajor, versionMinor, GraphicsContextFlags.Default);
+            internalControl.Size = targetControl.Size;
+
+            EventHandler windowBoundsChanged = (_, __) =>
+            {
+                internalControl.Size = targetControl.Size;
+                Framebuffer newBuffer = stateTracker.GetFramebuffer(FramebufferTarget.Framebuffer);
+                if (newBuffer == null)
+                {
+                    GL.Viewport(new Bounds2i(viewportOffset, viewportOffset + size));
+                    ThrowErrors();
+                }
+
+                if (size.x > 0 && size.y > 0)
+                    windowsChanged?.Invoke();
+            };
+
+            targetControl.Resize += windowBoundsChanged;
+            targetControl.Move += windowBoundsChanged;
+
+            targetControl.Controls.Add(internalControl);
+
+            try
+            {
+                OpenTK.Platform.IWindowInfo windowInfo = internalControl.WindowInfo;
+                return windowInfo;
+            }
+            catch
+            {
+                // TODO: research why this was done again, and document if sensible
+                return (OpenTK.Platform.IWindowInfo)Activator.CreateInstanceFrom(
+                          "OpenTK.dll",
+                          "OpenTK.Platform.Windows.WinWindowInfo",
+                          false,
+                          System.Reflection.BindingFlags.Default,
+                          null,
+                          new object[] { internalControl.Handle, null },
+                          null,
+                          null
+                      ).Unwrap();
+            }
+        }
+
+        public void FitInstancingBuffer(int maxSizeInBytes)
+        {
+            if (sharedInstancingBuffer == -1)
+            {
+                sharedInstancingBuffer = GL.GenBuffer();
+                ThrowErrors();
+            }
+
+            if (maxSizeInBytes > maxInstancingSize)
+            {
+                maxInstancingSize = Max(maxSizeInBytes, maxInstancingSize);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, sharedInstancingBuffer);
+                ThrowErrors();
+                GL.BufferData(BufferTarget.ArrayBuffer, maxInstancingSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+                ThrowErrors();
+            }
+        }
+
+        private void CreateDevice()
+        {
+            string vendor = GL.GetString(StringName.Vendor);
+            needsFlush = vendor.ToLower().Contains("intel");
+
+            GL.BlendFuncSeparate(
+                BlendingFactorSrc.SrcColor,
+                BlendingFactorDest.OneMinusSrcColor,
+                BlendingFactorSrc.SrcAlpha,
+                BlendingFactorDest.One
+                );
+            ThrowErrors();
+            GL.Disable(EnableCap.DepthTest);
+            ThrowErrors();
+            emptyVAO = GL.GenVertexArray();
+            ThrowErrors();
+            triangleVAO = GL.GenVertexArray();
+            ThrowErrors();
+
+            stateTracker = new GlStateTracker(this);
+        }
+
+        public void SetFullScreen(bool fullscreen, Vector2i windowedSize = default(Vector2i))
+        {
+            this.fullscreen = fullscreen;
+            deviceControl.FindForm().FormBorderStyle = fullscreen ? Forms.FormBorderStyle.None : Forms.FormBorderStyle.Sizable;
+            if (fullscreen)
+            {
+                deviceControl.Size = Forms.Screen.PrimaryScreen.Bounds.Size;
+                deviceControl.Location = new Vector2i(0);
+            }
+            else
+            {
+                deviceControl.Size = windowedSize;
+                deviceControl.Location = ((Vector2i)Forms.Screen.PrimaryScreen.WorkingArea.Size - size) / 2;
+            }
+        }
+
+        protected override void DoDispose()
+        {
+            base.DoDispose();
+
+            dispatcher.Dispatch(DestroyEverything);
+        }
+
+        void DestroyEverything()
+        {
+            ThrowErrors();
+
+            GL.DeleteVertexArray(emptyVAO);
+            ThrowErrors();
+            GL.DeleteVertexArray(triangleVAO);
+            ThrowErrors();
+            if (sharedInstancingBuffer != -1)
+                GL.DeleteBuffer(sharedInstancingBuffer);
+            ThrowErrors();
+
+            defaultMaterial.content.Dispose();
+            shaders.Dispose();
+            meshes.Dispose();
+            textures.Dispose();
+            graphicsContext.Dispose();
+            deviceControl.Dispose();
+        }
+    }
+}

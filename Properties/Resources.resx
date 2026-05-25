@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="CFX_DeferredShaderWithIntrinsics" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_DeferredShaderWithIntrinsics.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_DeferredShaderIntrinsics" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_DeferredShaderIntrinsics.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_HSV" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_HSV.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_Instancing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_Instancing.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_MaterialDefault" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_MaterialDefault.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_NormalMapPasses" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_NormalMapPasses.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_Shade" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_Shade.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_SkinnedInstancing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_SkinnedInstancing.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_Skinning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_Skinning.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_SpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\CFX_SpotLight.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_TransparentScreenSampling" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_TransparentScreenSampling.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="CFX_VertexShaders" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\CFX_VertexShaders.cfx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_Bloom" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\PostProcessors\FX_Bloom.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_Blur" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\PostProcessors\FX_Blur.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_DeferredShader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_DeferredShader.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_DirectionalLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_DirectionalLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_FXAA" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_FXAA.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_ManagedText" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_Managed_Text.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_NormalMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_NormalMap.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_InstancedNormalMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_NormalMapInstanced.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_SkinnedInstancedNormalMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_NormalMapInstancedSkinned.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_SkinnedNormalMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_NormalMapSkinning.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_ParticleSystem" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_ParticleSystem.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_PointLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_PointLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_SegmentLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_SegmentLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_CircularSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_CircularSpotLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_MaskedSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\Lights\FX_MaskedSpotLight.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_Sprite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_Sprite.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_TAA" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_TAA.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_Text" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_Text.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FX_TransparencyMask" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shaders\FX_TransparencyMask.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Mesh_Bone" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Mesh_Bone.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Mesh_PointLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Lights\Mesh_PointLight.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Mesh_CircularSpotLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Lights\Mesh_CircularSpotLight.gmdl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Tex_Black" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DefaultColors\Tex_Black.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Tex_NormalMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DefaultColors\Tex_NormalDefault.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Tex_DiffuseMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DefaultColors\Tex_White.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Tex_PlaceHolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Tex_PlaceHolder.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Tex_WhitePixel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DefaultColors\Tex_White.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+</root>

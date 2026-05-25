@@ -1,0 +1,46 @@
+#define WORLD_VERTEX_SHADER vs_transformPositionAndWorld, vs_transformNormal, vs_transformTangent, PASS(vec2 TEXCOORD0)
+#define MATERIAL_VERTEX_SHADER vs_transformPosition, PASS(vec2 TEXCOORD0)
+
+Pass World
+{
+	FragmentShader = fs_sampleWorldNormalMap;
+	VertexShader = WORLD_VERTEX_SHADER;
+}
+
+Pass Material
+{
+	FragmentShader = fs_sampleMaterial;
+	VertexShader = MATERIAL_VERTEX_SHADER;
+}
+
+Pass World_Transparent
+{
+	Enable(Blend, true);
+	BlendFuncSeperate(SrcAlpha, OneMinusSrcAlpha, SrcAlpha, OneMinusSrcAlpha);
+	DepthFunc(Lequal);
+	DepthMask(false);
+	FragmentShader = fs_sampleWorldNormalMap;
+	VertexShader = WORLD_VERTEX_SHADER;
+}
+
+Pass Material_Transparent
+{
+	Enable(Blend, true);
+	BlendFuncSeperate(SrcAlpha, OneMinusSrcAlpha, SrcAlpha, OneMinusSrcAlpha);
+	DepthFunc(Lequal);
+	DepthMask(false);
+	FragmentShader = fs_sampleMaterial;
+	VertexShader = MATERIAL_VERTEX_SHADER;
+}
+
+Pass World_AlphaTested
+{
+	FragmentShader = fs_sampleWorldNormalMapTested;
+	VertexShader = WORLD_VERTEX_SHADER;
+}
+
+Pass Material_AlphaTested
+{
+	FragmentShader = fs_sampleMaterialTested;
+	VertexShader = MATERIAL_VERTEX_SHADER;
+}

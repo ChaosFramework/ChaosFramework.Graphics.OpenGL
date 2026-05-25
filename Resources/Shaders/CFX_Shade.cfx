@@ -1,0 +1,49 @@
+vec4 cameraPosition : VIEW_POSITION;
+
+sampler2D positionSampler : POSITION_MAP;
+sampler2D normalSampler : NORMAL_MAP;
+sampler2D emissiveSampler : EMISSIVE_MAP;
+sampler2D diffuseSampler : DIFFUSE_MAP;
+sampler2D specularSampler : SPECULAR_MAP;
+sampler2D surfaceSampler : SURFACE_MAP;
+
+vec4 shadeDefault(vec4 diffuse, vec4 specular, vec3 worldPosition, vec3 normal, vec3 direction, float diffuseMultiplier)
+{
+	float d = max(0, -dot(direction, normal) * diffuseMultiplier);
+	vec3 reflection = direction - 2.0 * dot(direction, normal) * normal;
+	vec3 eye = normalize(cameraPosition.xyz - worldPosition);
+	float sharpness = specular.a;
+	float f = min(d, clamp(pow(max(0.0, dot(eye, reflection)), sharpness), 0.0, 1.0));
+	return (diffuse * d + specular * f);
+}
+
+vec4 shadeFromPoint(vec4 diffuse, vec4 specular, vec3 lightSource, float lightRange, vec3 worldPosition, vec3 normal)
+{
+	float distance = length(worldPosition - lightSource);
+	vec3 direction = (worldPosition - lightSource) / distance;
+	return shadeDefault(
+		diffuse,
+		specular,
+		worldPosition,
+		normal,
+		direction,
+		max(0.0, lightRange - distance) / lightRange
+	);
+}
+
+// TODO: add worldPos as an output
+void sampleLightData(vec2 inTex, out vec3 normal, out vec4 diffuse, out vec4 specular)
+{
+	normal = normalize(texture(normalSampler, inTex).xyz);
+	diffuse = texture(diffuseSampler, inTex);
+	specular = texture(specularSampler, inTex);
+	specular.a = texture(surfaceSampler, inTex).r;
+}
+
+void sampleLightData(ivec2 inTex, out vec3 normal, out vec4 diffuse, out vec4 specular)
+{
+	normal = normalize(texelFetch(normalSampler, inTex, 0).xyz);
+	diffuse = texelFetch(diffuseSampler, inTex, 0);
+	specular = texelFetch(specularSampler, inTex, 0);
+	specular.a = texelFetch(surfaceSampler, inTex, 0).r;
+}

@@ -1,0 +1,109 @@
+#define MAX_SPECULAR_SHARPNESS 128
+
+sampler2D emissiveSampler : EMISSIVE_MAP;
+sampler2D diffuseSampler : DIFFUSE_MAP;
+sampler2D specularSampler : SPECULAR_MAP;
+sampler2D normalSampler : NORMAL_MAP;
+
+vec4 color;
+float alphaThreshold;
+
+float computeSpecularSharpness(float s)
+{
+	return s * s * MAX_SPECULAR_SHARPNESS;
+}
+
+void sampleColoredMaterial(
+	vec2 inTex, out vec4 outEmissive,
+	out vec4 outDiffuse, out vec4 outSpecular
+) {
+	outEmissive = color * texture(emissiveSampler, inTex);
+	outDiffuse  = color * texture(diffuseSampler, inTex);
+	outSpecular = color * texture(specularSampler, inTex);
+}
+
+void fs_sampleColoredWorldNormalMap(
+	vec2 inTex : TEXCOORD0,
+	vec3 inWorldPos : TEXCOORD1,
+	vec3 inNormal : TEXCOORD2,
+	vec4 inTangent : TEXCOORD3,
+	out vec4 outPosition : COLOR0,
+	out vec4 outNormal : COLOR1,
+	out vec4 outSurface : COLOR2
+) {
+	vec4 normalSample;
+	sampleWorld(inTex, normalSample);
+	mat3 tangentSpace = mat3(inTangent.xyz, cross(inNormal, inTangent.xyz) * inTangent.w, inNormal);
+	outNormal = vec4(normalize(tangentSpace * (2.0 * texture(normalSampler, inTex).xyz - vec3(1.0))), normalSample.a * color.a);
+	outPosition = vec4(inWorldPos, 1.0);
+	outSurface = vec4(computeSpecularSharpness(texture(specularSampler, inTex).a), 0, 0, 0);
+}
+
+void sampleMaterial(
+	vec2 inTex,
+	out vec4 outEmissive,
+	out vec4 outDiffuse,
+	out vec4 outSpecular
+) {
+	outEmissive = texture(emissiveSampler, inTex);
+	outDiffuse  = texture(diffuseSampler, inTex);
+	outSpecular = texture(specularSampler, inTex);
+}
+
+void sampleWorld(
+	vec2 inTex,
+	out vec4 outNormal
+) {
+	outNormal = texture(normalSampler, inTex);
+}
+
+void fs_sampleMaterial(
+	vec2 inTex : TEXCOORD0,
+	out vec4 outEmissive : COLOR0,
+	out vec4 outDiffuse : COLOR1,
+	out vec4 outSpecular : COLOR2
+) {
+	sampleMaterial(inTex, outEmissive, outDiffuse, outSpecular);
+}
+
+void fs_sampleMaterialTested(
+	vec2 inTex : TEXCOORD0,
+	out vec4 outEmissive : COLOR0,
+	out vec4 outDiffuse : COLOR1,
+	out vec4 outSpecular : COLOR2
+) {
+	sampleMaterial(inTex, outEmissive, outDiffuse, outSpecular);
+	if (outDiffuse.a < alphaThreshold)
+		discard;
+}
+
+void fs_sampleWorldNormalMap(
+	vec2 inTex : TEXCOORD0,
+	vec3 inWorldPos : TEXCOORD1,
+	vec3 inNormal : TEXCOORD2,
+	vec4 inTangent : TEXCOORD3,
+	out vec4 outPosition : COLOR0,
+	out vec4 outNormal : COLOR1,
+	out vec4 outSurface : COLOR2
+) {
+	vec4 normalSample;
+	sampleWorld(inTex, normalSample);
+	mat3 tangentSpace = mat3(inTangent.xyz, cross(inNormal, inTangent.xyz) * inTangent.w, inNormal);
+	outNormal = vec4(normalize((tangentSpace * (2.0 * normalSample.xyz - vec3(1.0)))), normalSample.a);
+	outPosition = vec4(inWorldPos, 1.0);
+	outSurface = vec4(computeSpecularSharpness(texture(specularSampler, inTex).a), 0, 0, 0);
+}
+
+void fs_sampleWorldNormalMapTested(
+	vec2 inTex : TEXCOORD0, 
+	vec3 inWorldPos : TEXCOORD1, 
+	vec3 inNormal : TEXCOORD2,
+	vec4 inTangent : TEXCOORD3,
+	out vec4 outPosition : COLOR0,
+	out vec4 outNormal : COLOR1,
+	out vec4 outSurface : COLOR2
+) {
+	fs_sampleWorldNormalMap(inTex, inWorldPos, inNormal, inTangent, outPosition, outNormal, outSurface);
+	if (outNormal.a < alphaThreshold)
+		discard;
+}
