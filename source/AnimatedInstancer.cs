@@ -94,17 +94,17 @@ namespace ChaosFramework.Graphics.OpenGl
             Initialize_2(graphics, parameters);
         }
 
-        public void AddInstance(Matrix[] bones, Matrix baseTransform, params Vector4f[] customRegisters)
+        public unsafe void AddInstance(Matrix[] bones, Matrix baseTransform, params Vector4f[] customRegisters)
         {
             invalidated = true;
             if (informer.numInstances >= maxInstances)
             {
                 int newMaxInstances = Max(1, maxInstances * 2);
                 IntPtr newDataPtr = Marshal.AllocHGlobal(newMaxInstances * instanceStride);
-                ChaosUtil.Platform.Windows.MicrosoftVisualCppRuntime.memory.memcpy.Invoke(
-                    newDataPtr,
-                    instanceBuffer.Value,
-                    maxInstances * instanceStride
+                NativeMemory.Copy(
+                    (void*)instanceBuffer.Value,
+                    (void*)newDataPtr,
+                    (UIntPtr)(maxInstances * instanceStride)
                     );
 
                 maxInstances = newMaxInstances;

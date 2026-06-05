@@ -86,7 +86,7 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             unmanagedData = Marshal.AllocHGlobal(newGlBufferSize.Value);
         }
 
-        void Enlarge()
+        unsafe void Enlarge()
         {
             System.Diagnostics.Debug.Assert(unmanagedData != default(IntPtr));
 
@@ -94,10 +94,10 @@ namespace ChaosFramework.Graphics.OpenGl.Lights
             newGlBufferSize = oldSizeInBytes << 1;
 
             IntPtr newUnmanagedData = Marshal.AllocHGlobal(newGlBufferSize.Value);
-            ChaosUtil.Platform.Windows.MicrosoftVisualCppRuntime.memory.memcpy.Invoke(
-                newUnmanagedData,
-                unmanagedData,
-                oldSizeInBytes
+            NativeMemory.Copy(
+                (void*)unmanagedData,
+                (void*)newUnmanagedData,
+                (UIntPtr)oldSizeInBytes
                 );
             maxInstances <<= 1;
 

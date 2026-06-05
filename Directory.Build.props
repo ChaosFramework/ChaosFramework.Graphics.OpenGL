@@ -2,7 +2,6 @@
 <Project>
   <PropertyGroup>
     <TargetFrameworks>net8.0-windows</TargetFrameworks>
-    <UseWindowsForms>true</UseWindowsForms>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
 

@@ -1,15 +1,16 @@
 using ChaosFramework.Core;
 using ChaosFramework.Graphics.OpenGl.AssetContainers;
-using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
+using ChaosFramework.Platform;
 using ChaosFramework.Shapes;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Platform;
+using OpenTK.Windowing.Desktop;
 using System;
 using System.Threading;
 using static ChaosFramework.Math.Clamping;
 using SysCol = System.Collections.Generic;
-using Forms = System.Windows.Forms;
 
 namespace ChaosFramework.Graphics.OpenGl
 {
@@ -30,14 +31,10 @@ namespace ChaosFramework.Graphics.OpenGl
                 throw new InvalidOperationException(error.ToString());
         }
 
+        public readonly PlatformContext platformContext;
         public readonly Dispatcher dispatcher;
         public readonly Shaders shaders;
-        public readonly Forms.Control deviceControl;
-        public readonly GraphicsContext graphicsContext;
-
-        public readonly GraphicsMode graphicsMode = GraphicsMode.Default;
         public readonly int versionMajor, versionMinor;
-        public readonly OpenTK.Platform.IWindowInfo defaultWindow;
         public readonly int glVersionMajor, glVersionMinor;
         public readonly int coreProfile;
 
@@ -66,33 +63,30 @@ namespace ChaosFramework.Graphics.OpenGl
 
         public GlStateTracker stateTracker { get; private set; }
 
-        public bool fullscreen { get; private set; }
         public float ratio { get { return (float)width / height; } }
-        public int width => deviceControl.ClientSize.Width;
-        public int height => deviceControl.ClientSize.Height;
+        public int width => platformContext.primaryWindow.width;
+        public int height => platformContext.primaryWindow.height;
         public Vector2i size => new Vector2i(width, height);
-        public Vector2i viewportOffset => new Vector2i(0, deviceControl.Height - height);
+        public Vector2i viewportOffset => 0;
 
         public Graphics(
-            Forms.Control deviceControl,
+            PlatformContext platformContext,
             int versionMajor,
             int versionMinor,
-            bool fullScreen = false,
             Action<Graphics> loadingScreen = null
-            ) : this(Dispatcher.dispatcher, deviceControl, versionMajor, versionMinor, fullScreen, loadingScreen)
+            ) : this(Dispatcher.dispatcher, platformContext, versionMajor, versionMinor, loadingScreen)
         { }
 
         public Graphics(
             Dispatcher dispatcher,
-            Forms.Control deviceControl,
+            PlatformContext platformContext,
             int versionMajor,
             int versionMinor,
-            bool fullScreen = false,
             Action<Graphics> loadingScreen = null
             )
         {
             this.dispatcher = dispatcher;
-            this.deviceControl = deviceControl;
+            this.platformContext = platformContext;
             this.versionMajor = versionMajor;
             this.versionMinor = versionMinor;
 
@@ -101,12 +95,9 @@ namespace ChaosFramework.Graphics.OpenGl
 
             graphicsThread = System.Threading.Thread.CurrentThread;
 
-            defaultWindow = MakeGl(deviceControl);
+            platformContext.Setup();
 
-            graphicsContext = new GraphicsContext(graphicsMode, defaultWindow, versionMajor, versionMinor, GraphicsContextFlags.Default);
-            graphicsContext.LoadAll();
-            graphicsContext.SwapInterval = 0;
-
+            GL.LoadBindings(new OpenTK.Windowing.GraphicsLibraryFramework.GLFWBindingsContext());
             int numExts = GL.GetInteger(GetPName.NumExtensions);
             for (int i = 0; i < numExts; i++)
                 supportedExtensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
@@ -140,51 +131,6 @@ namespace ChaosFramework.Graphics.OpenGl
                     return false;
 
             return true;
-        }
-
-        public OpenTK.Platform.IWindowInfo MakeGl(Forms.Control targetControl)
-        {
-            OpenTK.GLControl internalControl = new OpenTK.GLControl(graphicsMode, versionMajor, versionMinor, GraphicsContextFlags.Default);
-            internalControl.Size = targetControl.Size;
-
-            EventHandler windowBoundsChanged = (_, __) =>
-            {
-                internalControl.Size = targetControl.Size;
-                Framebuffer newBuffer = stateTracker.GetFramebuffer(FramebufferTarget.Framebuffer);
-                if (newBuffer == null)
-                {
-                    GL.Viewport(new Bounds2i(viewportOffset, viewportOffset + size));
-                    ThrowErrors();
-                }
-
-                if (size.x > 0 && size.y > 0)
-                    windowsChanged?.Invoke();
-            };
-
-            targetControl.Resize += windowBoundsChanged;
-            targetControl.Move += windowBoundsChanged;
-
-            targetControl.Controls.Add(internalControl);
-
-            try
-            {
-                OpenTK.Platform.IWindowInfo windowInfo = internalControl.WindowInfo;
-                return windowInfo;
-            }
-            catch
-            {
-                // TODO: research why this was done again, and document if sensible
-                return (OpenTK.Platform.IWindowInfo)Activator.CreateInstanceFrom(
-                          "OpenTK.dll",
-                          "OpenTK.Platform.Windows.WinWindowInfo",
-                          false,
-                          System.Reflection.BindingFlags.Default,
-                          null,
-                          new object[] { internalControl.Handle, null },
-                          null,
-                          null
-                      ).Unwrap();
-            }
         }
 
         public void FitInstancingBuffer(int maxSizeInBytes)
@@ -227,22 +173,6 @@ namespace ChaosFramework.Graphics.OpenGl
             stateTracker = new GlStateTracker(this);
         }
 
-        public void SetFullScreen(bool fullscreen, Vector2i windowedSize = default(Vector2i))
-        {
-            this.fullscreen = fullscreen;
-            deviceControl.FindForm().FormBorderStyle = fullscreen ? Forms.FormBorderStyle.None : Forms.FormBorderStyle.Sizable;
-            if (fullscreen)
-            {
-                deviceControl.Size = Forms.Screen.PrimaryScreen.Bounds.Size;
-                deviceControl.Location = new Vector2i(0);
-            }
-            else
-            {
-                deviceControl.Size = windowedSize;
-                deviceControl.Location = ((Vector2i)Forms.Screen.PrimaryScreen.WorkingArea.Size - size) / 2;
-            }
-        }
-
         protected override void DoDispose()
         {
             base.DoDispose();
@@ -266,8 +196,9 @@ namespace ChaosFramework.Graphics.OpenGl
             shaders.Dispose();
             meshes.Dispose();
             textures.Dispose();
-            graphicsContext.Dispose();
-            deviceControl.Dispose();
+
+            // TODO: figure out what needs to be done here
+            // graphicsContext.Dispose();
         }
     }
 }
