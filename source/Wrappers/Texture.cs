@@ -72,13 +72,13 @@ namespace ChaosFramework.Graphics.OpenGl
         public static Texture FromFile(Dispatcher dispatcher, string sourceFile, float scale = 1, bool flipY = true)
         {
             using (FileStream str = File.OpenRead(sourceFile))
-                return FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(str), scale, flipY);
+                return FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(str, flipY), scale);
         }
 
         public static Texture FromStream(Dispatcher dispatcher, System.IO.Stream sourceFile, float scale = 1, bool flipY = true)
-            => FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(sourceFile), scale, flipY);
+            => FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(sourceFile, flipY), scale);
 
-        public static Texture FromBitmap(Dispatcher dispatcher, Rgba8Image bmp, float scale = 1, bool flipY = true)
+        public static Texture FromBitmap(Dispatcher dispatcher, Rgba8Image bmp, float scale = 1)
         {
             if (scale != 1)
             {
@@ -96,8 +96,7 @@ namespace ChaosFramework.Graphics.OpenGl
                     PixelFormat.Rgba,
                     PixelInternalFormat.Rgba8
                 ),
-                bmp.GetRawData,
-                flipY
+                bmp.GetRawData
                 );
         }
 
@@ -116,18 +115,15 @@ namespace ChaosFramework.Graphics.OpenGl
         public Texture(
             Dispatcher dispatcher,
             Parameters args,
-            Func<RawDataHandle> rawDataGetter = null,
-            bool flipY = true)
+            Func<RawDataHandle> rawDataGetter = null)
             : this(dispatcher, args)
         {
             this.dispatcher = dispatcher;
-            this.dispatcher.RunAndAwait(() => Construct(rawDataGetter, flipY));
+            this.dispatcher.RunAndAwait(() => Construct(rawDataGetter));
         }
 
-        void Construct(Func<RawDataHandle> rawDataGetter, bool flipY)
+        void Construct(Func<RawDataHandle> rawDataGetter)
         {
-            // TODO: flipY?
-
             Graphics.ThrowErrors();
             textureIndex = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, textureIndex);

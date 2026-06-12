@@ -90,12 +90,12 @@ namespace ChaosFramework.Graphics.OpenGl.Text
                 sdfBytes = tmp;
             }
 
-            Rgba8Image colImg = Imaging.Formats.Png.FromStream(rd.BaseStream);
+            Rgba8Image colImg = Imaging.Formats.Png.FromStream(rd.BaseStream, false);
             colBounds = colImg.Size();
 
             System.Action bind = () =>
             {
-                col = Texture.FromBitmap(graphics.dispatcher, colImg, flipY: false);
+                col = Texture.FromBitmap(graphics.dispatcher, colImg);
                 sdf = new Texture(
                     graphics.dispatcher,
                     new Texture.Parameters(
