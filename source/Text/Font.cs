@@ -6,7 +6,7 @@ using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
 using ChaosUtil.Primitives;
 using OpenTK.Graphics.OpenGL;
-using System.Drawing;
+using ChaosFramework.Graphics.Imaging;
 using System.IO;
 using SysCol = System.Collections.Generic;
 using ChaosFramework.Graphics.Text;
@@ -90,36 +90,34 @@ namespace ChaosFramework.Graphics.OpenGl.Text
                 sdfBytes = tmp;
             }
 
-            using (Bitmap colImg = BitmapUtils.ReadBitmapFromStream(rd.BaseStream))
+            Rgba8Image colImg = Imaging.Formats.Png.FromStream(rd.BaseStream);
+            colBounds = colImg.Size();
+
+            System.Action bind = () =>
             {
-                colBounds = new Vector2i(colImg.Width, colImg.Height);
+                col = Texture.FromBitmap(graphics.dispatcher, colImg, flipY: false);
+                sdf = new Texture(
+                    graphics.dispatcher,
+                    new Texture.Parameters(
+                        sdfBounds.x,
+                        sdfBounds.y,
+                        pixelType: PixelType.UnsignedByte,
+                        minFilter: TextureMinFilter.Linear,
+                        magFilter: TextureMagFilter.Linear,
+                        pixelFormat: PixelFormat.Red,
+                        internalFormat: PixelInternalFormat.R8
+                        ),
+                    () => RawDataHandle.Create(sdfBytes)
+                    );
+                GL.BindTexture(TextureTarget.Texture2D, col.textureIndex);
+                Graphics.ThrowErrors();
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+                Graphics.ThrowErrors();
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                Graphics.ThrowErrors();
+            };
 
-                System.Action bind = () =>
-                {
-                    col = Texture.FromBitmap(graphics.dispatcher, colImg, flipY: false);
-                    sdf = new Texture(
-                        graphics.dispatcher,
-                        new Texture.Parameters(
-                            sdfBounds.x,
-                            sdfBounds.y,
-                            pixelType: PixelType.UnsignedByte,
-                            minFilter: TextureMinFilter.Linear,
-                            magFilter: TextureMagFilter.Linear,
-                            pixelFormat: PixelFormat.Red,
-                            internalFormat: PixelInternalFormat.R8
-                            ),
-                        sdfBytes
-                        );
-                    GL.BindTexture(TextureTarget.Texture2D, col.textureIndex);
-                    Graphics.ThrowErrors();
-                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-                    Graphics.ThrowErrors();
-                    GL.BindTexture(TextureTarget.Texture2D, 0);
-                    Graphics.ThrowErrors();
-                };
-
-                graphics.dispatcher.RunAndAwait(bind);
-            }
+            graphics.dispatcher.RunAndAwait(bind);
         }
 
         public void SetValues(ChaosShader.Shader fx)
