@@ -1,3 +1,5 @@
+/*
+
 using ChaosFramework.Collections;
 using ChaosFramework.Core;
 using ChaosFramework.Graphics.AssetContainers;
@@ -183,3 +185,5 @@ namespace ChaosFramework.Graphics.OpenGl
         }
     }
 }
+
+*/
