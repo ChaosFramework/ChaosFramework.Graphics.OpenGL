@@ -47,6 +47,7 @@ namespace ChaosFramework.Graphics.OpenGl
                 throw new NotSupportedException($"Unknown OpenGL pixel format: {fmt}");
         }
 
+        /*
         public static Bitmap ConvertToBitmap(Texture tex)
         {
             int fb, oldPack;
@@ -128,5 +129,6 @@ namespace ChaosFramework.Graphics.OpenGl
                 return bm;
             }
         }
+        */
     }
 }
