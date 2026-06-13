@@ -63,12 +63,6 @@ namespace ChaosFramework.Graphics.OpenGl
 
         public GlStateTracker stateTracker { get; private set; }
 
-        public float ratio { get { return (float)width / height; } }
-        public int width => platformContext.primaryWindow.width;
-        public int height => platformContext.primaryWindow.height;
-        public Vector2i size => new Vector2i(width, height);
-        public Vector2i viewportOffset => 0;
-
         public Graphics(
             PlatformContext platformContext,
             int versionMajor,
