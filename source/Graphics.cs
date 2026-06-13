@@ -91,7 +91,6 @@ namespace ChaosFramework.Graphics.OpenGl
 
             glContext.Init();
 
-            GL.LoadBindings(new OpenTK.Windowing.GraphicsLibraryFramework.GLFWBindingsContext());
             int numExts = GL.GetInteger(GetPName.NumExtensions);
             for (int i = 0; i < numExts; i++)
                 supportedExtensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
