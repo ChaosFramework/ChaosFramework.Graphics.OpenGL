@@ -31,7 +31,7 @@ namespace ChaosFramework.Graphics.OpenGl
                 throw new InvalidOperationException(error.ToString());
         }
 
-        public readonly PlatformContext platformContext;
+        public readonly GlContext glContext;
         public readonly Dispatcher dispatcher;
         public readonly Shaders shaders;
         public readonly int versionMajor, versionMinor;
@@ -64,7 +64,7 @@ namespace ChaosFramework.Graphics.OpenGl
         public GlStateTracker stateTracker { get; private set; }
 
         public Graphics(
-            PlatformContext platformContext,
+            GlContext platformContext,
             int versionMajor,
             int versionMinor,
             Action<Graphics> loadingScreen = null
@@ -73,14 +73,14 @@ namespace ChaosFramework.Graphics.OpenGl
 
         public Graphics(
             Dispatcher dispatcher,
-            PlatformContext platformContext,
+            GlContext platformContext,
             int versionMajor,
             int versionMinor,
             Action<Graphics> loadingScreen = null
             )
         {
             this.dispatcher = dispatcher;
-            this.platformContext = platformContext;
+            this.glContext = platformContext;
             this.versionMajor = versionMajor;
             this.versionMinor = versionMinor;
 
@@ -89,7 +89,7 @@ namespace ChaosFramework.Graphics.OpenGl
 
             graphicsThread = System.Threading.Thread.CurrentThread;
 
-            platformContext.Setup();
+            glContext.Init();
 
             GL.LoadBindings(new OpenTK.Windowing.GraphicsLibraryFramework.GLFWBindingsContext());
             int numExts = GL.GetInteger(GetPName.NumExtensions);
