@@ -34,7 +34,7 @@ namespace ChaosFramework.Graphics.OpenGl
                 {
                     GL.FramebufferTexture(
                         FramebufferTarget.Framebuffer,
-                        FramebufferAttachment.ColorAttachment0,
+                        FramebufferAttachment.ColorAttachment0 + i,
                         textures[i].textureIndex,
                         0
                         );
