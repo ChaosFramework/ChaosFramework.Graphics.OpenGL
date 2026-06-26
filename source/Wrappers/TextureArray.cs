@@ -12,8 +12,10 @@ namespace ChaosFramework.Graphics.OpenGl
         public readonly int numLevels;
 
         /// <param name="levels">
-        ///     An array of not-null raw pixel data arrays filled with the raw data
-        ///     matching <paramref name="internalFormat"/>.
+        ///     An array of raw data handles retrievers matching <paramref name="args.internalFormat"/>.
+        ///     <para>
+        ///         The retrieved raw data handles will be freed within this function.
+        ///     </para>
         /// </param>
         public TextureArray(
             Dispatcher dispatcher,
