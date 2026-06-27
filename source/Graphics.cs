@@ -14,7 +14,7 @@ using SysCol = System.Collections.Generic;
 
 namespace ChaosFramework.Graphics.OpenGl
 {
-    public class Graphics : Disposable
+    public partial class Graphics : Disposable
     {
         static Thread graphicsThread;
 

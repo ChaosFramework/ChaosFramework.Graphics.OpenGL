@@ -7,7 +7,7 @@ using System.IO;
 
 namespace ChaosFramework.Graphics.OpenGl
 {
-    public class Texture : Disposable
+    public partial class Texture : Disposable
     {
         public struct Parameters
         {
@@ -28,11 +28,9 @@ namespace ChaosFramework.Graphics.OpenGl
 
             public float ratio => (float)width / height;
 
-            public Vector2i size => new Vector2i(width, height);
+            public readonly Vector2i size => new(width, height);
 
             public int area => width * height;
-
-            public int sizeInBits => area * TextureUtils.GetPixelFormatBitCount(internalFormat);
 
             public Parameters(
                 int width,
