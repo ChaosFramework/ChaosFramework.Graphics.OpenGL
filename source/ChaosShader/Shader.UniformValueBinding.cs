@@ -106,7 +106,7 @@ namespace ChaosFramework.Graphics.OpenGl.ChaosShader
                 SetValue(GetVariableHandle(variable), value?.content);
         }
 
-        void SetValue<T>(ShaderVariable variable, T value)
+        unsafe void SetValue<T>(ShaderVariable variable, T value)
         {
             AssertAlive();
             if (variable == null)
@@ -136,12 +136,12 @@ namespace ChaosFramework.Graphics.OpenGl.ChaosShader
                     for (int i = 0; i < array.Length; i++)
                         // TODO: For some reason this specific line can cause an AccessViolation that is not repeatable.
                         //       This may be related to the driver locking on this memory when it is being copied to the GPU
-                        ChaosUtil.Platform.Windows.MicrosoftVisualCppRuntime.memory.memcpy.Invoke(
-                            IntPtr.Add(
+                        NativeMemory.Copy(
+                            (void*)Marshal.UnsafeAddrOfPinnedArrayElement(array, i),
+                            (void*)IntPtr.Add(
                                 uniformValueBuffer,
                                 (int)uniformHandle.offset + i * uniformHandle.arrayStride),
-                            Marshal.UnsafeAddrOfPinnedArrayElement(array, i),
-                            elementTypeSize
+                            (UIntPtr)elementTypeSize
                             );
                     arrayHandle.Free();
                 }

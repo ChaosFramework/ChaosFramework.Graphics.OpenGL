@@ -1,12 +1,13 @@
 using ChaosFramework.Core;
+using ChaosFramework.Graphics.Imaging;
 using ChaosFramework.Math.Vectors;
 using OpenTK.Graphics.OpenGL;
-using System.Drawing;
-using Imaging = System.Drawing.Imaging;
+using System;
+using System.IO;
 
 namespace ChaosFramework.Graphics.OpenGl
 {
-    public class Texture : Disposable
+    public partial class Texture : Disposable
     {
         public struct Parameters
         {
@@ -27,11 +28,9 @@ namespace ChaosFramework.Graphics.OpenGl
 
             public float ratio => (float)width / height;
 
-            public Vector2i size => new Vector2i(width, height);
+            public readonly Vector2i size => new(width, height);
 
             public int area => width * height;
-
-            public int sizeInBits => area * TextureUtils.GetPixelFormatBitCount(internalFormat);
 
             public Parameters(
                 int width,
@@ -70,38 +69,32 @@ namespace ChaosFramework.Graphics.OpenGl
 
         public static Texture FromFile(Dispatcher dispatcher, string sourceFile, float scale = 1, bool flipY = true)
         {
-            using (Bitmap bmp = new Bitmap(sourceFile))
-                return FromBitmap(dispatcher, bmp, scale, flipY);
+            using (FileStream str = File.OpenRead(sourceFile))
+                return FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(str, flipY), scale);
         }
 
         public static Texture FromStream(Dispatcher dispatcher, System.IO.Stream sourceFile, float scale = 1, bool flipY = true)
-            => FromBitmap(dispatcher, BitmapUtils.ReadBitmapFromStream(sourceFile), scale, flipY);
+            => FromBitmap(dispatcher, Imaging.Formats.Png.FromStream(sourceFile, flipY), scale);
 
-        public static Texture FromBitmap(Dispatcher dispatcher, Bitmap bmp, float scale = 1, bool flipY = true)
+        public static Texture FromBitmap(Dispatcher dispatcher, Rgba8Image bmp, float scale = 1)
         {
-            if (scale != 1 || bmp.PixelFormat != Imaging.PixelFormat.Format32bppArgb)
+            if (scale != 1)
             {
-                Bitmap tmp = bmp;
-                bmp = BitmapUtils.ConvertBitmap(
-                    tmp,
-                    Imaging.PixelFormat.Format32bppArgb, (int)(tmp.Width * scale), (int)(tmp.Height * scale)
-                    );
-                tmp.Dispose();
+                throw new NotImplementedException("Scaling while loading sounds like a bad idea tbh.");
             }
 
-            byte[] bitmapData = BitmapUtils.GetPixelData(bmp);
             return new Texture(
                 dispatcher,
                 new Parameters(
-                    bmp.Width,
-                    bmp.Height,
+                    (int)bmp.width,
+                    (int)bmp.height,
                     PixelType.UnsignedByte,
                     null,
                     null,
                     PixelFormat.Rgba,
                     PixelInternalFormat.Rgba8
                 ),
-                BitmapUtils.GetPixelData(bmp, flipY)
+                bmp.GetRawData
                 );
         }
 
@@ -120,14 +113,14 @@ namespace ChaosFramework.Graphics.OpenGl
         public Texture(
             Dispatcher dispatcher,
             Parameters args,
-            byte[] data = null)
+            Func<RawDataHandle> rawDataGetter = null)
             : this(dispatcher, args)
         {
             this.dispatcher = dispatcher;
-            this.dispatcher.RunAndAwait(() => Construct(data));
+            this.dispatcher.RunAndAwait(() => Construct(rawDataGetter));
         }
 
-        void Construct(byte[] data)
+        void Construct(Func<RawDataHandle> rawDataGetter)
         {
             Graphics.ThrowErrors();
             textureIndex = GL.GenTexture();
@@ -135,27 +128,30 @@ namespace ChaosFramework.Graphics.OpenGl
             Graphics.ThrowErrors();
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)args.magFilter);
             Graphics.ThrowErrors();
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)args.MinFilter(data != null));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)args.MinFilter(rawDataGetter != null));
             Graphics.ThrowErrors();
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             Graphics.ThrowErrors();
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
             Graphics.ThrowErrors();
 
-            GL.TexImage2D(
-                TextureTarget.Texture2D,
-                0,
-                args.internalFormat,
-                args.width,
-                args.height,
-                0,
-                args.pixelFormat,
-                args.pixelType,
-                data
-                );
-            Graphics.ThrowErrors();
+            using (RawDataHandle rawData = rawDataGetter?.Invoke())
+            {
+                GL.TexImage2D(
+                    TextureTarget.Texture2D,
+                    0,
+                    args.internalFormat,
+                    (int)args.width,
+                    (int)args.height,
+                    0,
+                    args.pixelFormat,
+                    args.pixelType,
+                    rawData?.firstElementAddress ?? IntPtr.Zero
+                    );
+                Graphics.ThrowErrors();
+            }
 
-            if (data != null)
+            if (rawDataGetter != null)
             {
                 GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
                 Graphics.ThrowErrors();

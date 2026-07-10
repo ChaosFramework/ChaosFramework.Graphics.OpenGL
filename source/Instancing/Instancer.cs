@@ -83,7 +83,7 @@ namespace ChaosFramework.Graphics.OpenGl.Instancing
                 return privateBuffer;
         }
 
-        void ResizePrivateBufferIfNeeded()
+        unsafe void ResizePrivateBufferIfNeeded()
         {
             if (numInstances >= expectedInstances + overflow)
             {
@@ -94,10 +94,10 @@ namespace ChaosFramework.Graphics.OpenGl.Instancing
                     overflow *= 2;
 
                 IntPtr newData = Marshal.AllocHGlobal(stride * (expectedInstances + overflow));
-                ChaosUtil.Platform.Windows.MicrosoftVisualCppRuntime.memory.memcpy.Invoke(
-                    newData,
-                    unmanagedData,
-                    oldSize
+                NativeMemory.Copy(
+                    (void*)unmanagedData,
+                    (void*)newData,
+                    (UIntPtr)oldSize
                     );
                 Marshal.FreeHGlobal(unmanagedData);
                 unmanagedData = newData;

@@ -34,14 +34,14 @@
   </ItemGroup>
 
   <!-- References -->
-  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosUtil.Platform.Windows.targets" />
   <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosAnalyzers.ClassIntegrity.Types.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Platform.targets" />
   <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Components.targets" />
+  <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Core.targets" />
   <Import Project="$(SolutionDir)submodules/ChaosPresets.References/ProjectReferences/ChaosFramework.Graphics.targets" />
 
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="3.0.1" />
-    <PackageReference Include="OpenTK.GLControl" Version="3.0.1" />
+    <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="System.Resources.Extensions" Version="9.0.0" />
   </ItemGroup>
 

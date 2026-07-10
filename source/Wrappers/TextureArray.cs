@@ -1,4 +1,6 @@
+using System;
 using ChaosFramework.Core;
+using ChaosFramework.Graphics.Imaging;
 using OpenTK.Graphics.OpenGL;
 
 namespace ChaosFramework.Graphics.OpenGl
@@ -10,13 +12,15 @@ namespace ChaosFramework.Graphics.OpenGl
         public readonly int numLevels;
 
         /// <param name="levels">
-        ///     An array of not-null raw pixel data arrays filled with the raw data
-        ///     matching <paramref name="internalFormat"/>.
+        ///     An array of raw data handles retrievers matching <paramref name="args.internalFormat"/>.
+        ///     <para>
+        ///         The retrieved raw data handles will be freed within this function.
+        ///     </para>
         /// </param>
         public TextureArray(
             Dispatcher dispatcher,
             Parameters args,
-            byte[][] levels
+            Func<RawDataHandle>[] levels
             )
             : base(dispatcher, args)
         {
@@ -39,21 +43,22 @@ namespace ChaosFramework.Graphics.OpenGl
             this.dispatcher.RunAndAwait(CreateTexture);
         }
 
-        void AssignData(byte[][] levels)
+        void AssignData(Func<RawDataHandle>[] levels)
         {
             GL.BindTexture(TextureTarget.Texture2DArray, textureIndex);
             for (int i = 0; i < levels.Length; i++)
             {
                 Graphics.ThrowErrors();
-                GL.TexSubImage3D(
-                    TextureTarget.Texture2DArray,
-                    0,
-                    0, 0, i,
-                    args.width, args.height, 1,
-                    args.pixelFormat,
-                    args.pixelType,
-                    levels[i]
-                    );
+                using (RawDataHandle rawData = levels[i]())
+                    GL.TexSubImage3D(
+                        TextureTarget.Texture2DArray,
+                        0,
+                        0, 0, i,
+                        args.width, args.height, 1,
+                        args.pixelFormat,
+                        args.pixelType,
+                        rawData.firstElementAddress
+                        );
                 Graphics.ThrowErrors();
             }
             GL.BindTexture(TextureTarget.Texture2DArray, 0);

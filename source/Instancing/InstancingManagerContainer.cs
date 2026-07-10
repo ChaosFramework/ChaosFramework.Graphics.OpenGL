@@ -123,7 +123,7 @@ namespace ChaosFramework.Graphics.OpenGl.Instancing
 
         public SysCol.IEnumerable<InstancingAttribute> EnumerateInstancers()
         {
-            foreach(InstancingAttribute attr in allRuntimeInstancers)
+            foreach (InstancingAttribute attr in allRuntimeInstancers)
                 yield return attr;
         }
 

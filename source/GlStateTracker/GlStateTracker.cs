@@ -1,3 +1,4 @@
+using System;
 using ChaosFramework.Core;
 using ChaosFramework.Math;
 using OpenTK.Graphics.OpenGL;
@@ -55,8 +56,11 @@ namespace ChaosFramework.Graphics.OpenGl
 
         public Framebuffer BindFramebuffer(FramebufferTarget target, Framebuffer newBuffer)
         {
-            GL.Viewport(newBuffer?.viewport ?? new Bounds2i(graphics.viewportOffset, graphics.viewportOffset + graphics.size));
-            Graphics.ThrowErrors();
+            if (newBuffer != null)
+            {
+                GL.Viewport(newBuffer.viewport);
+                Graphics.ThrowErrors();
+            }
 
             Framebuffer output;
             if (!boundFrameBuffers.TryGetValue(target, out output))
@@ -78,10 +82,6 @@ namespace ChaosFramework.Graphics.OpenGl
 
             return null;
         }
-
-        public Bounds2i FullViewPort()
-            => GetFramebuffer(FramebufferTarget.Framebuffer)?.viewport
-            ?? new Bounds2i(graphics.viewportOffset, graphics.viewportOffset + graphics.size);
 
         public void SetRenderState<ChangeLogType, StateType>(StateType value)
             where ChangeLogType : struct, RenderStateChange<StateType>
