@@ -103,9 +103,11 @@ namespace ChaosFramework.Graphics.OpenGl.ChaosShader
             AssertCompiled();
 
             if (graphics.needsFlush)
+            {
                 GL.Flush();
+                Graphics.ThrowErrors();
+            }
 
-            Graphics.ThrowErrors();
             if (activePassStack.length <= 0)
                 throw new InvalidOperationException("No Passes to end.");
 
