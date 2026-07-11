@@ -28,7 +28,7 @@ namespace ChaosFramework.Graphics.OpenGl
         {
             graphics.shaders.spriteEffect.SetValue("tex", tex);
             graphics.shaders.spriteEffect.BeginPass("Screen");
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            DrawFullscreen(graphics);
             graphics.shaders.spriteEffect.EndPass();
         }
 
