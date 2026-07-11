@@ -87,20 +87,28 @@ namespace ChaosFramework.Graphics.OpenGl
             coreProfile = 100 * versionMajor + 10 * versionMinor;
             supportedExtensions = new SysCol.HashSet<string>();
 
-            graphicsThread = System.Threading.Thread.CurrentThread;
+            graphicsThread = dispatcher.createdFrom;
 
-            glContext.Init();
+            int maj = -1, min = -1;
+            void InitGl()
+            {
+                glContext.Init();
+                int numExts = GL.GetInteger(GetPName.NumExtensions);
+                for (int i = 0; i < numExts; i++)
+                    supportedExtensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
 
-            int numExts = GL.GetInteger(GetPName.NumExtensions);
-            for (int i = 0; i < numExts; i++)
-                supportedExtensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
-            glVersionMajor = GL.GetInteger(GetPName.MajorVersion);
-            glVersionMinor = GL.GetInteger(GetPName.MinorVersion);
+                maj = GL.GetInteger(GetPName.MajorVersion);
+                min = GL.GetInteger(GetPName.MinorVersion);
+            }
+            dispatcher.RunAndAwait(InitGl);
+            glVersionMajor = maj;
+            glVersionMinor = min;
 
-            CreateDevice();
+            dispatcher.Dispatch(CreateDevice);
 
             new Shaders(this, ref shaders);
-            loadingScreen?.Invoke(this);
+            if (loadingScreen != null)
+                dispatcher.RunAndAwait(() => loadingScreen.Invoke(this));
 
             meshes = new MeshContainer(StreamSources.meshes, dispatcher, false);
             meshes.AddFactory("$Sprite", _ => new Model.Mesh(dispatcher, MeshData.sprite));
@@ -109,7 +117,6 @@ namespace ChaosFramework.Graphics.OpenGl
             whitePixel = textures.Load("$WhitePixel", this);
 
             defaultMaterial = MaterialContainer.Entry.Mock((_, __) => new Material(this), DisposeMaterial);
-            ThrowErrors();
         }
 
         Material CreateDefaultMaterial(MaterialContainer.Key key, CancellationToken ct) => new Material(this);
