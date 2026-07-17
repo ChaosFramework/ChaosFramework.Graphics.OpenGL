@@ -2,6 +2,7 @@ using ChaosFramework.Core;
 using ChaosFramework.Graphics.Imaging;
 using OpenTK.Graphics.OpenGL;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ChaosFramework.Graphics.OpenGl
 {
@@ -23,8 +24,22 @@ namespace ChaosFramework.Graphics.OpenGl
             Stream front
             )
         {
-            Rgba8Image leftImg = Imaging.Formats.Png.FromStream(left, false);
+            Task<Rgba8Image>[] loadTasks = [
+                Task.Run(() => Imaging.Formats.Png.FromStream(left, false)),
+                Task.Run(() => Imaging.Formats.Png.FromStream(right, false)),
+                Task.Run(() => Imaging.Formats.Png.FromStream(bottom, false)),
+                Task.Run(() => Imaging.Formats.Png.FromStream(top, false)),
+                Task.Run(() => Imaging.Formats.Png.FromStream(back, false)),
+                Task.Run(() => Imaging.Formats.Png.FromStream(front, false)),
+            ];
+            Task loadAll = Task.WhenAll(loadTasks);
+            loadAll.Wait();
+            if (!loadAll.IsCompletedSuccessfully)
+                throw loadAll.Exception;
+
+            Rgba8Image leftImg = loadTasks[0].Result;
             CubeTexture result = new CubeTexture(dispatcher, new Parameters((int)leftImg.w, (int)leftImg.h));
+
             dispatcher.RunAndAwait(() =>
             {
                 result.textureIndex = GL.GenTexture();
@@ -32,11 +47,11 @@ namespace ChaosFramework.Graphics.OpenGl
                 Graphics.ThrowErrors();
 
                 result.AssignFace(TextureTarget.TextureCubeMapNegativeX, leftImg);
-                result.AssignFace(TextureTarget.TextureCubeMapPositiveX, Imaging.Formats.Png.FromStream(right, false));
-                result.AssignFace(TextureTarget.TextureCubeMapNegativeY, Imaging.Formats.Png.FromStream(bottom, false));
-                result.AssignFace(TextureTarget.TextureCubeMapPositiveY, Imaging.Formats.Png.FromStream(top, false));
-                result.AssignFace(TextureTarget.TextureCubeMapNegativeZ, Imaging.Formats.Png.FromStream(back, false));
-                result.AssignFace(TextureTarget.TextureCubeMapPositiveZ, Imaging.Formats.Png.FromStream(front, false));
+                result.AssignFace(TextureTarget.TextureCubeMapPositiveX, loadTasks[1].Result);
+                result.AssignFace(TextureTarget.TextureCubeMapNegativeY, loadTasks[2].Result);
+                result.AssignFace(TextureTarget.TextureCubeMapPositiveY, loadTasks[3].Result);
+                result.AssignFace(TextureTarget.TextureCubeMapNegativeZ, loadTasks[4].Result);
+                result.AssignFace(TextureTarget.TextureCubeMapPositiveZ, loadTasks[5].Result);
                 GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
                 Graphics.ThrowErrors();
 
