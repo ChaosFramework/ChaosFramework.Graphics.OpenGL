@@ -236,6 +236,7 @@ namespace ChaosFramework.Graphics.OpenGl.Text
         {
             UpdateText(ref mesh, new(this, text, layout));
             float bestScale = GetScale(mesh.geo.textBounds);
+            float minDivider = bestScale;
 
             TextMesh bestFitMesh = mesh;
 
@@ -254,6 +255,26 @@ namespace ChaosFramework.Graphics.OpenGl.Text
                 }
                 else
                     break;
+            }
+
+            // phase 2: binary search for best divider
+            float attemptedDivider = (minDivider + maxDivider) * 0.5f;
+            float step = (maxDivider - minDivider) * 0.5f;
+            float lastScale = bestScale;
+            for (int i = 0; i < 20; i++)
+            {
+                string brokenText = FitText(text, targetWidth / attemptedDivider);
+                UpdateText(ref mesh, new(this, brokenText, layout));
+                float nextScale = GetScale(mesh.geo.textBounds);
+                if (nextScale > bestScale)
+                {
+                    bestScale = nextScale;
+                    bestFitMesh = mesh;
+                }
+
+                attemptedDivider += nextScale < lastScale ? step : -step;
+                step *= 0.5f;
+                lastScale = nextScale;
             }
 
             mesh = bestFitMesh;
