@@ -10,6 +10,7 @@ using ChaosFramework.Graphics.Imaging;
 using System.IO;
 using SysCol = System.Collections.Generic;
 using ChaosFramework.Graphics.Text;
+using static ChaosFramework.Math.Clamping;
 
 namespace ChaosFramework.Graphics.OpenGl.Text
 {
@@ -229,6 +230,13 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             if (outTxt.Length > 0)
                 outTxt.Remove(outTxt.Length - 1, 1);
             return outTxt.ToString();
+        }
+
+        public float FitTextToBounds(ref TextMesh mesh, string text, LayoutInfo layout, float targetWidth, float targetHeight)
+        {
+            UpdateText(ref mesh, new(this, text, layout));
+            float smallestPossibleScale = Min(targetWidth / mesh.geo.textBounds.width, targetHeight / mesh.geo.textBounds.height);
+            return smallestPossibleScale;
         }
     }
 }
