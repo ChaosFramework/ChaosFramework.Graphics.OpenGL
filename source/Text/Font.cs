@@ -261,7 +261,13 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             float attemptedDivider = (minDivider + maxDivider) * 0.5f;
             float step = (maxDivider - minDivider) * 0.5f;
             float lastScale = bestScale;
-            for (int i = 0; i < 20; i++)
+
+            // We know that we are done when the step direction changes,
+            // but the broken text stays the same.
+            string lastBrokenText = mesh.geo.text;
+            bool lastStepPositive = true;
+
+            while (true)
             {
                 string brokenText = FitText(text, targetWidth / attemptedDivider);
                 UpdateText(ref mesh, new(this, brokenText, layout));
@@ -272,9 +278,16 @@ namespace ChaosFramework.Graphics.OpenGl.Text
                     bestFitMesh = mesh;
                 }
 
-                attemptedDivider += nextScale < lastScale ? step : -step;
+                bool stepPositive = nextScale < lastScale;
+                // in edge cases, the step may become too small to run into the logical exit condition
+                if (step < 0.001f || stepPositive ^ lastStepPositive && brokenText == lastBrokenText)
+                    break;
+
+                attemptedDivider += stepPositive ? step : -step;
                 step *= 0.5f;
                 lastScale = nextScale;
+                lastBrokenText = brokenText;
+                lastStepPositive = stepPositive;
             }
 
             mesh = bestFitMesh;
