@@ -235,8 +235,31 @@ namespace ChaosFramework.Graphics.OpenGl.Text
         public float FitTextToBounds(ref TextMesh mesh, string text, LayoutInfo layout, float targetWidth, float targetHeight)
         {
             UpdateText(ref mesh, new(this, text, layout));
-            float smallestPossibleScale = Min(targetWidth / mesh.geo.textBounds.width, targetHeight / mesh.geo.textBounds.height);
-            return smallestPossibleScale;
+            float bestScale = GetScale(mesh.geo.textBounds);
+
+            TextMesh bestFitMesh = mesh;
+
+            // phase 1: find an upper bound for "maxDivider"
+            float maxDivider = bestScale;
+            while (true)
+            {
+                maxDivider *= 2;
+                string brokenText = FitText(text, targetWidth / maxDivider);
+                UpdateText(ref mesh, new(this, brokenText, layout));
+                float nextScale = GetScale(mesh.geo.textBounds);
+                if (nextScale > bestScale)
+                {
+                    bestScale = nextScale;
+                    bestFitMesh = mesh;
+                }
+                else
+                    break;
+            }
+
+            mesh = bestFitMesh;
+            return bestScale;
+
+            float GetScale(Bounds2f bounds) => Min(targetWidth / bounds.width, targetHeight / bounds.height);
         }
     }
 }
