@@ -1,17 +1,17 @@
-using ChaosFramework.Shapes;
+using System.IO;
+using System.Linq;
 using ChaosFramework.Collections;
 using ChaosFramework.Core;
+using ChaosFramework.Graphics.Imaging;
+using ChaosFramework.Graphics.Text;
 using ChaosFramework.IO;
 using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
+using ChaosFramework.Shapes;
 using ChaosUtil.Primitives;
 using OpenTK.Graphics.OpenGL;
-using ChaosFramework.Graphics.Imaging;
-using System.IO;
-using SysCol = System.Collections.Generic;
-using ChaosFramework.Graphics.Text;
-using System.Linq;
 using static ChaosFramework.Math.Clamping;
+using SysCol = System.Collections.Generic;
 
 namespace ChaosFramework.Graphics.OpenGl.Text
 {
