@@ -10,6 +10,7 @@ using ChaosFramework.Graphics.Imaging;
 using System.IO;
 using SysCol = System.Collections.Generic;
 using ChaosFramework.Graphics.Text;
+using System.Linq;
 using static ChaosFramework.Math.Clamping;
 
 namespace ChaosFramework.Graphics.OpenGl.Text
@@ -202,8 +203,11 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             occupiedMeshes.Clear();
         }
 
-        public string FitText(string text, float unscaledMaxWidth)
+        public string FitText(string text, float unscaledMaxWidth, bool keepExplicitLineBreaks = false)
         {
+            if (keepExplicitLineBreaks)
+                return string.Join('\n', text.Split('\r', '\n').Select(l => FitText(l, unscaledMaxWidth, false)));;
+
             LinkedList<string> cutLines = new LinkedList<string>();
             string[] split = text.Split(new char[] { ' ', '\r', '\n', '\t', '\b' }, System.StringSplitOptions.RemoveEmptyEntries);
             int cursor = 0;
@@ -245,7 +249,7 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             while (true)
             {
                 maxDivider *= 2;
-                string brokenText = FitText(text, targetWidth / maxDivider);
+                string brokenText = FitText(text, targetWidth / maxDivider, true);
                 UpdateText(ref mesh, new(this, brokenText, layout));
                 float nextScale = GetScale(mesh.geo.textBounds);
                 if (nextScale > bestScale)
@@ -269,7 +273,7 @@ namespace ChaosFramework.Graphics.OpenGl.Text
 
             while (true)
             {
-                string brokenText = FitText(text, targetWidth / attemptedDivider);
+                string brokenText = FitText(text, targetWidth / attemptedDivider, true);
                 UpdateText(ref mesh, new(this, brokenText, layout));
                 float nextScale = GetScale(mesh.geo.textBounds);
                 if (nextScale > bestScale)
