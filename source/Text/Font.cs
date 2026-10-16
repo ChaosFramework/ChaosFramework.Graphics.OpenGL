@@ -1,15 +1,17 @@
-using ChaosFramework.Shapes;
+using System.IO;
+using System.Linq;
 using ChaosFramework.Collections;
 using ChaosFramework.Core;
+using ChaosFramework.Graphics.Imaging;
+using ChaosFramework.Graphics.Text;
 using ChaosFramework.IO;
 using ChaosFramework.Math;
 using ChaosFramework.Math.Vectors;
+using ChaosFramework.Shapes;
 using ChaosUtil.Primitives;
 using OpenTK.Graphics.OpenGL;
-using ChaosFramework.Graphics.Imaging;
-using System.IO;
+using static ChaosFramework.Math.Clamping;
 using SysCol = System.Collections.Generic;
-using ChaosFramework.Graphics.Text;
 
 namespace ChaosFramework.Graphics.OpenGl.Text
 {
@@ -201,8 +203,11 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             occupiedMeshes.Clear();
         }
 
-        public string FitText(string text, float unscaledMaxWidth)
+        public string FitText(string text, float unscaledMaxWidth, bool keepExplicitLineBreaks = false)
         {
+            if (keepExplicitLineBreaks)
+                return string.Join('\n', text.Split('\r', '\n').Select(l => FitText(l, unscaledMaxWidth, false)));;
+
             LinkedList<string> cutLines = new LinkedList<string>();
             string[] split = text.Split(new char[] { ' ', '\r', '\n', '\t', '\b' }, System.StringSplitOptions.RemoveEmptyEntries);
             int cursor = 0;
@@ -229,6 +234,70 @@ namespace ChaosFramework.Graphics.OpenGl.Text
             if (outTxt.Length > 0)
                 outTxt.Remove(outTxt.Length - 1, 1);
             return outTxt.ToString();
+        }
+
+        public float FitTextToBounds(ref TextMesh mesh, string text, LayoutInfo layout, float targetWidth, float targetHeight)
+        {
+            UpdateText(ref mesh, new(this, text, layout));
+            float bestScale = GetScale(mesh.geo.textBounds);
+            float minDivider = bestScale;
+
+            TextMesh bestFitMesh = mesh;
+
+            // phase 1: find an upper bound for "maxDivider"
+            float maxDivider = bestScale;
+            while (true)
+            {
+                maxDivider *= 2;
+                string brokenText = FitText(text, targetWidth / maxDivider, true);
+                UpdateText(ref mesh, new(this, brokenText, layout));
+                float nextScale = GetScale(mesh.geo.textBounds);
+                if (nextScale > bestScale)
+                {
+                    bestScale = nextScale;
+                    bestFitMesh = mesh;
+                }
+                else
+                    break;
+            }
+
+            // phase 2: binary search for best divider
+            float attemptedDivider = (minDivider + maxDivider) * 0.5f;
+            float step = (maxDivider - minDivider) * 0.5f;
+            float lastScale = bestScale;
+
+            // We know that we are done when the step direction changes,
+            // but the broken text stays the same.
+            string lastBrokenText = mesh.geo.text;
+            bool lastStepPositive = true;
+
+            while (true)
+            {
+                string brokenText = FitText(text, targetWidth / attemptedDivider, true);
+                UpdateText(ref mesh, new(this, brokenText, layout));
+                float nextScale = GetScale(mesh.geo.textBounds);
+                if (nextScale > bestScale)
+                {
+                    bestScale = nextScale;
+                    bestFitMesh = mesh;
+                }
+
+                bool stepPositive = nextScale < lastScale;
+                // in edge cases, the step may become too small to run into the logical exit condition
+                if (step < 0.001f || stepPositive ^ lastStepPositive && brokenText == lastBrokenText)
+                    break;
+
+                attemptedDivider += stepPositive ? step : -step;
+                step *= 0.5f;
+                lastScale = nextScale;
+                lastBrokenText = brokenText;
+                lastStepPositive = stepPositive;
+            }
+
+            mesh = bestFitMesh;
+            return bestScale;
+
+            float GetScale(Bounds2f bounds) => Min(targetWidth / bounds.width, targetHeight / bounds.height);
         }
     }
 }
