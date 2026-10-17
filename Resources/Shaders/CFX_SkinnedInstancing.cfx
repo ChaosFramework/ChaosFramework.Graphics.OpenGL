@@ -46,7 +46,7 @@ void vs_transform(
 	out vec4 outTangent : TEXCOORD3
 ) {
 	mat4 boneTransform = interpolateBoneTransform(instanceID, boneIndices, boneWeights);
-	mat4 combinedTransform= boneTransform * instanceTransform;
+	mat4 combinedTransform = boneTransform * instanceTransform;
 	outWorldPosition = (vec4(inPosition, 1) * (combinedTransform)).xyz;
 	outPosition = (vec4(outWorldPosition, 1) * viewProj);
 	outNormal = normalize((vec4(inNormal, 0) * combinedTransform).xyz);
@@ -62,6 +62,7 @@ void vs_transformPosition(
 	out vec4 outPosition : gl_Position
 ) {
 	mat4 boneTransform = interpolateBoneTransform(instanceID, boneIndices, boneWeights);
-	vec3 outWorldPosition = (vec4(inPosition, 1) * (boneTransform * instanceTransform)).xyz;
+	mat4 combinedTransform = boneTransform * instanceTransform;
+	vec3 outWorldPosition = (vec4(inPosition, 1) * (combinedTransform)).xyz;
 	outPosition = (vec4(outWorldPosition, 1) * viewProj);
 }
