@@ -66,3 +66,18 @@ void vs_transformPosition(
 	vec3 outWorldPosition = (vec4(inPosition, 1) * (combinedTransform)).xyz;
 	outPosition = (vec4(outWorldPosition, 1) * viewProj);
 }
+
+void vs_transformPositionAndWorld(
+	vec3 inPosition : POSITION,
+	vec4 boneIndices : BONE_INDICES,
+	vec4 boneWeights : BONE_WEIGHTS,
+	mat4 instanceTransform : INSTANCE_TRANSFORM,
+	int instanceID : gl_InstanceID,
+	out vec4 outPosition : gl_Position,
+	out vec3 outWorldPosition : TEXCOORD1
+) {
+	mat4 boneTransform = interpolateBoneTransform(instanceID, boneIndices, boneWeights);
+	mat4 combinedTransform = boneTransform * instanceTransform;
+	outWorldPosition = (vec4(inPosition, 1) * (combinedTransform)).xyz;
+	outPosition = (vec4(outWorldPosition, 1) * viewProj);
+}
