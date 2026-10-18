@@ -80,7 +80,10 @@ namespace ChaosFramework.Graphics.OpenGl
             }
 
             for (int i = 0; i < 4; ++i)
+            {
+                sizes[i] = sizes[i].Max(2);
                 streams[i].Insert(0, new Rgba8Image((uint)sizes[i].x, (uint)sizes[i].y, defaultCols[i]));
+            }
 
             Build(dispatcher, sizes, streams, minFilter, magFilter);
         }
